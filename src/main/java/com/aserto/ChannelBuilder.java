@@ -6,9 +6,11 @@ import io.grpc.Metadata;
 import io.grpc.netty.GrpcSslContexts;
 import io.grpc.netty.NettyChannelBuilder;
 import io.grpc.stub.MetadataUtils;
+import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 
-import javax.net.ssl.SSLException;
+import java.io.File;
+import java.io.IOException;
 
 
 public class ChannelBuilder {
@@ -58,7 +60,7 @@ public class ChannelBuilder {
         return this;
     }
 
-    public ManagedChannel build() throws SSLException {
+    public ManagedChannel build() throws IOException {
         Metadata metadata = new Metadata();
         Metadata.Key<String> asertoTenantId = Metadata.Key.of("aserto-tenant-id", Metadata.ASCII_STRING_MARSHALLER);
         Metadata.Key<String> authorization = Metadata.Key.of("authorization", Metadata.ASCII_STRING_MARSHALLER);
@@ -74,9 +76,16 @@ public class ChannelBuilder {
                 .forAddress(addr, port)
                 .intercept(MetadataUtils.newAttachHeadersInterceptor(metadata));
 
-        boolean secure = authzConfig.getInsecure();
-        if (secure) {
+        boolean insecure = authzConfig.getInsecure();
+        boolean caSpecified  = !authzConfig.getCaCertPath().isEmpty();
+
+        if (insecure) {
             channelBuilder.sslContext(GrpcSslContexts.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build());
+        } else if (caSpecified) {
+            SslContext channel = GrpcSslContexts.forClient()
+                    .trustManager(new File(authzConfig.getCaCertPath()))
+                    .build();
+            channelBuilder.sslContext(channel);
         }
 
 
