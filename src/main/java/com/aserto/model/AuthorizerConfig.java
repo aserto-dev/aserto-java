@@ -1,5 +1,10 @@
 package com.aserto.model;
 
+import io.github.cdimascio.dotenv.Dotenv;
+import io.github.cdimascio.dotenv.DotenvException;
+
+import java.util.logging.Logger;
+
 public class AuthorizerConfig {
     private String tenantId = "";
     private String address = "localhost:8282";
@@ -9,7 +14,21 @@ public class AuthorizerConfig {
     private String caCertPath = "";
 
     public AuthorizerConfig() {
-        // TODO: Add default values from config file
+        Logger logger = Logger.getLogger(AuthorizerConfig.class.getName());
+        Dotenv dotenv;
+        try {
+            dotenv = Dotenv.load();
+            tenantId = dotenv.get("ASERTO_TENANT_ID", "");
+            address = dotenv.get("ASERTO_AUTHORIZER_SERVICE_URL", "localhost:8282");
+            apiKey = dotenv.get("ASERTO_AUTHORIZER_API_KEY", "");
+            token = dotenv.get("ASERTO_AUTHORIZER_TOKEN", "");
+            insecure = dotenv.get("ASERTO_AUTHORIZER_INSECURE", "false").equals("true");
+            caCertPath = dotenv.get("ASERTO_AUTHORIZER_CA_CERT_PATH", "");
+        }
+        catch (DotenvException ex) {
+            logger.log(java.util.logging.Level.INFO, ex.getMessage());
+        }
+
     }
 
     public String getTenantId() {
