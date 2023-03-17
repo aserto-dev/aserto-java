@@ -1,4 +1,4 @@
-# java-aserto
+# Aserto Java
 Java library for Aserto services
 
 
