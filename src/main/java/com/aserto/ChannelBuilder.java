@@ -11,7 +11,6 @@ import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 
 import javax.net.ssl.SSLException;
 import java.io.File;
-import java.io.IOException;
 
 
 public class ChannelBuilder {
