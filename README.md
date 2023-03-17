@@ -1,4 +1,6 @@
 # Aserto Java
+[![slack](https://img.shields.io/badge/slack-Aserto%20Community-brightgreen)](https://asertocommunity.slack.com)
+
 Java library for Aserto services
 
 
