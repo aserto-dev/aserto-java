@@ -154,12 +154,12 @@
         <repository>
             <id>github</id>
             <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/aserto-dev/java-aserto</url>
+            <url>https://maven.pkg.github.com/aserto-dev/aserto-java</url>
         </repository>
         <snapshotRepository>
             <id>github</id>
             <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/aserto-dev/java-aserto</url>
+            <url>https://maven.pkg.github.com/aserto-dev/aserto-java</url>
         </snapshotRepository>
     </distributionManagement>
 </project>

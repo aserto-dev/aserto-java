@@ -2,7 +2,6 @@ import com.aserto.AuthzClient;
 import com.aserto.authorizer.v2.*;
 import com.aserto.authorizer.v2.api.IdentityType;
 import com.aserto.authorizer.v2.api.Module;
-import com.aserto.authorizer.v2.api.PolicyInstance;
 import com.aserto.model.IdentityCtx;
 import com.aserto.model.PolicyCtx;
 import com.google.protobuf.Struct;
@@ -87,6 +86,30 @@ class AuthzClientTest {
                             responseObserver.onNext(queryResponse);
                             responseObserver.onCompleted();
                         }
+
+                        @Override
+                        public void decisionTree(DecisionTreeRequest request, StreamObserver<DecisionTreeResponse> responseObserver) {
+                            Value falseValue = Value.newBuilder().setBoolValue(false).build();
+                            Struct decision = Struct.newBuilder().putFields("allowed", falseValue).build();
+
+                            Value structValue = Value.newBuilder().setStructValue(decision).build();
+                            Struct response = Struct.newBuilder().putFields("todoApp.GET.todos", structValue).build();
+
+                            DecisionTreeResponse decisionTreeResponse = DecisionTreeResponse.newBuilder().setPath(response).build();
+
+                            responseObserver.onNext(decisionTreeResponse);
+                            responseObserver.onCompleted();
+                        }
+
+                        @Override
+                        public void getPolicy(GetPolicyRequest request, StreamObserver<GetPolicyResponse> responseObserver) {
+                            Module module = Module.newBuilder().setId(request.getId()).build();
+                            GetPolicyResponse getPolicyResponse = GetPolicyResponse.newBuilder().setResult(module).build();
+
+
+                            responseObserver.onNext(getPolicyResponse);
+                            responseObserver.onCompleted();
+                        }
                     }));
 
     private AuthzClient client;
@@ -159,12 +182,36 @@ class AuthzClientTest {
         assertEquals(1, queryResponse.getFieldsCount());
     }
 
-    private PolicyInstance getPolicy(String name, String label) {
-        PolicyInstance.Builder policyInstance = PolicyInstance.newBuilder();
-        policyInstance.setName(name);
-        policyInstance.setInstanceLabel(label);
+    @Test
+    void testDecisionTree() throws SSLException {
+        // Arrange
+        IdentityCtx identityCtx = new IdentityCtx("beth@the-smiths.com", IdentityType.IDENTITY_TYPE_SUB);
+        PolicyCtx policyCtx = new PolicyCtx("todo", "todo", "", new String[]{"allowed"});
 
-        return policyInstance.build();
+        // Act
+        Map<String, Value> decisionTreeResponse = client.decisionTree(identityCtx, policyCtx);
+
+
+        Value falseValue = Value.newBuilder().setBoolValue(false).build();
+        Struct decision = Struct.newBuilder().putFields("allowed", falseValue).build();
+
+        Value structValue = Value.newBuilder().setStructValue(decision).build();
+        Struct expectedResponse = Struct.newBuilder().putFields("todoApp.GET.todos", structValue).build();
+
+        // Assert
+        assertTrue(compareDecisionMaps(expectedResponse.getFieldsMap(), decisionTreeResponse));
+    }
+
+    @Test
+    void testGetPolicy() throws SSLException {
+        // Arrange
+        String policyPath = "todo/tmp/opa/oci/github/workspace/content/src/policies/todoApp.GET.users.__userID.rego";
+
+        // Act
+        Module policyResponse = client.getPolicy(policyPath);
+
+        // Assert
+        assertEquals(policyPath, policyResponse.getId());
     }
 
     private boolean compareLists(List list1, List list2) {
@@ -173,6 +220,21 @@ class AuthzClientTest {
         }
         for (int i = 0; i < list1.size(); i++) {
             if (!list1.get(i).equals(list2.get(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean compareDecisionMaps(Map<String, Value> s1, Map<String, Value> s2) {
+        if (s1.size() != s2.size()) {
+            return false;
+        }
+        for (Map.Entry<String, Value> entry : s1.entrySet()) {
+            if (!s2.containsKey(entry.getKey())) {
+                return false;
+            }
+            if (!s2.get(entry.getKey()).equals(entry.getValue())) {
                 return false;
             }
         }
