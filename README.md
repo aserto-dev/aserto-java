@@ -2,6 +2,26 @@
 Java library for Aserto services
 
 
+
+### Build
+- Clone the [java-authorizer](https://github.com/aserto-dev/java-authorizer) project
+```bash
+git clone git@github.com:aserto-dev/java-authorizer.git
+```
+- build and install the `java-authorizer` maven package `mvn clean install`
+- clone the [aserto-java](https://github.com/aserto-dev/aserto-java) project
+- build and install the `aserto-java` maven pakcage `mvn clean install`
+
+### Add the client to your project
+- add the fallowing dependency to your `pom.xml` file
+```maven
+<dependency>
+    <groupId>com.aserto</groupId>
+    <artifactId>aserto-java</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+</dependency>
+```
+
 ### Run unit tests
 ```
 mvn clean test
