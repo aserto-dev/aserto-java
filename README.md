@@ -45,24 +45,24 @@ mvn clean deploy -Dgpg.passphrase="<gpg-passphrase>" -Pci-cd
 Start [topaz](https://github.com/aserto-dev/topaz)
 
 ```java
-# create a channel that has the connection details
+// create a channel that has the connection details
 ManagedChannel channel = new ChannelBuilder()
         .withAddr("localhost:8282")
         .withInsecure(true)
         .build();
 
-# create
+// create authz client
 AuthzClient authzClient =  new AuthzClient(channel);
 
-# identity context contains information abou the user that requests access to some resource
+// identity context contains information abou the user that requests access to some resource
 IdentityCtx identityCtx = new IdentityCtx("rick@the-citadel.com", IdentityType.IDENTITY_TYPE_SUB);
 
-# contains information about the policy we want to check for the provided identity
+// contains information about the policy we want to check for the provided identity
 PolicyCtx policyCtx = new PolicyCtx("todo", "todo", "todoApp.DELETE.todos.__id", new String[]{"allowed"});
 
-# check if the identity is allowed to perform the action
-List<Decision> decisions = client.is(identityCtx, policyCtx);
-client.close();
+// check if the identity is allowed to perform the action
+List<Decision> decisions = authzClient.is(identityCtx, policyCtx);
+authzClient.close();
 
 decisions.forEach(decision -> {
     String dec = decision.getDecision();
