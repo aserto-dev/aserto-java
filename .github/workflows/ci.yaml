@@ -31,7 +31,7 @@ jobs:
           java-version: 8
           distribution: temurin
 
-      - name: Test with Maven
+      - name: Run tests
         run: mvn clean test
   release:
     runs-on: ubuntu-latest
@@ -62,8 +62,10 @@ jobs:
           gpg-private-key: ${{ env.GPG_PRIVATE_KEY }}
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
-      - name: build artifact
-        run: mvn clean package
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Create release
         uses: ncipollo/release-action@v1
@@ -77,4 +79,5 @@ jobs:
           mvn \
             --no-transfer-progress \
             --batch-mode \
+            -Pci-cd \
             deploy
