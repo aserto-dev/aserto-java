@@ -1,5 +1,6 @@
 package org.example;
 
+import com.aserto.AuthorizerClient;
 import com.aserto.AuthzClient;
 import com.aserto.ChannelBuilder;
 import com.aserto.authorizer.v2.Decision;
@@ -12,7 +13,7 @@ import javax.net.ssl.SSLException;
 import java.util.List;
 
 public class AuthzExample {
-    public static void main(String[] args) throws SSLException {
+    public static void main(String[] args) throws Exception {
         // create a channel that has the connection details
         ManagedChannel channel = new ChannelBuilder()
                 .withAddr("localhost:8282")
@@ -20,7 +21,7 @@ public class AuthzExample {
                 .build();
 
         // create authz client
-        AuthzClient authzClient =  new AuthzClient(channel);
+        AuthorizerClient authzClient = new AuthzClient(channel);
 
         // identity context contains information abou the user that requests access to some resource
         IdentityCtx identityCtx = new IdentityCtx("rick@the-citadel.com", IdentityType.IDENTITY_TYPE_SUB);

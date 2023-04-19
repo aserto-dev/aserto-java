@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class AuthzClient implements AutoCloseable {
+public class AuthzClient implements AuthorizerClient {
     private AuthorizerGrpc.AuthorizerBlockingStub client;
     private ManagedChannel channel;
     public AuthzClient(ManagedChannel channel) {
@@ -74,7 +74,7 @@ public class AuthzClient implements AutoCloseable {
         return queryResponse.getResponse();
     }
 
-    public Map<String, Value> decisionTree(IdentityCtx identityCtx, PolicyCtx policyCtx){
+    public Map<String, Value> decisionTree(IdentityCtx identityCtx, PolicyCtx policyCtx) {
         DecisionTreeRequest.Builder decisionTreeBuilder = DecisionTreeRequest.newBuilder();
 
         IdentityContext identityContext = buildIdentityContext(identityCtx);

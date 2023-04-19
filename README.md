@@ -52,7 +52,7 @@ ManagedChannel channel = new ChannelBuilder()
         .build();
 
 // create authz client
-AuthzClient authzClient =  new AuthzClient(channel);
+AuthorizerClient authzClient =  new AuthzClient(channel);
 
 // identity context contains information abou the user that requests access to some resource
 IdentityCtx identityCtx = new IdentityCtx("rick@the-citadel.com", IdentityType.IDENTITY_TYPE_SUB);

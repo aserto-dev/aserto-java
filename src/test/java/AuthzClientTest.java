@@ -1,3 +1,4 @@
+import com.aserto.AuthorizerClient;
 import com.aserto.AuthzClient;
 import com.aserto.authorizer.v2.*;
 import com.aserto.authorizer.v2.api.IdentityType;
@@ -112,7 +113,7 @@ class AuthzClientTest {
                         }
                     }));
 
-    private AuthzClient client;
+    private AuthorizerClient client;
 
     @BeforeEach
     public void setUp() throws IOException {
@@ -132,7 +133,7 @@ class AuthzClientTest {
     }
 
     @Test
-    void testIsTrueCall() throws SSLException {
+    void testIsTrueCall() throws Exception {
         // Arrange
         IdentityCtx identityCtx = new IdentityCtx("rick@the-citadel.com", IdentityType.IDENTITY_TYPE_SUB);
         PolicyCtx policyCtx = new PolicyCtx("todo", "todo", "todoApp.DELETE.todos.__id", new String[]{"allowed"});
@@ -149,7 +150,7 @@ class AuthzClientTest {
     }
 
     @Test
-    void testIsFalseCall() throws SSLException {
+    void testIsFalseCall() throws Exception {
         // Arrange
         IdentityCtx identityCtx = new IdentityCtx("beth@the-smiths.com", IdentityType.IDENTITY_TYPE_SUB);
         PolicyCtx policyCtx = new PolicyCtx("todo", "todo", "todoApp.DELETE.todos.__id", new String[]{"allowed"});
@@ -166,7 +167,7 @@ class AuthzClientTest {
     }
 
     @Test
-    void testQueryCall() throws SSLException {
+    void testQueryCall() throws Exception {
         // Arrange
         PolicyCtx policyCtx = new PolicyCtx("todo", "todo", "todoApp.DELETE.todos.__id", new String[]{"allowed"});
         String query = "x = input; y = data";
@@ -183,7 +184,7 @@ class AuthzClientTest {
     }
 
     @Test
-    void testDecisionTree() throws SSLException {
+    void testDecisionTree() {
         // Arrange
         IdentityCtx identityCtx = new IdentityCtx("beth@the-smiths.com", IdentityType.IDENTITY_TYPE_SUB);
         PolicyCtx policyCtx = new PolicyCtx("todo", "todo", "", new String[]{"allowed"});
