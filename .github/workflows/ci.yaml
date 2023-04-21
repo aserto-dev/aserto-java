@@ -67,6 +67,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: build artifact
+        run: mvn clean package
+
       - name: Create release
         uses: ncipollo/release-action@v1
         with:
