@@ -3,7 +3,9 @@
 
 Java library for Aserto services
 
-
+> **Warning**
+> 
+> **0.20.5** is the latest version published to maven central. Versions starting with 1.0.z have been removed from maven central and are no longer available for download.
 
 ### Build
 `mvn clean install`
@@ -14,7 +16,7 @@ Java library for Aserto services
 <dependency>
     <groupId>com.aserto</groupId>
     <artifactId>aserto-java</artifactId>
-    <version>1.0.0</version>
+    <version>0.20.5</version>
 </dependency>
 ```
 
