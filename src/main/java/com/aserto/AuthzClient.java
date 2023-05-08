@@ -11,6 +11,7 @@ import com.google.protobuf.Value;
 import io.grpc.ManagedChannel;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -43,15 +44,21 @@ public class AuthzClient implements AuthorizerClient {
     }
 
     public List<Decision> is(IdentityCtx identityCtx, PolicyCtx policyCtx) {
+        return this.is(identityCtx, policyCtx, Collections.emptyMap());
+    }
+
+    public List<Decision> is(IdentityCtx identityCtx, PolicyCtx policyCtx, Map<String, Value> values) {
         IsRequest.Builder isBuilder = IsRequest.newBuilder();
 
         IdentityContext identityContext = buildIdentityContext(identityCtx);
         PolicyContext policyContext = buildPolicyContext(policyCtx);
         PolicyInstance policy = buildPolicy(policyCtx.getName(), policyCtx.getLabel());
+        Struct.Builder resourceContext = buildResourceContext(values);
 
         isBuilder.setIdentityContext(identityContext);
         isBuilder.setPolicyContext(policyContext);
         isBuilder.setPolicyInstance(policy);
+        isBuilder.setResourceContext(resourceContext);
 
         IsResponse isResponse = client.is(isBuilder.build());
 
@@ -63,8 +70,7 @@ public class AuthzClient implements AuthorizerClient {
         queryRequestBuilder.setQuery(query);
 
         PolicyInstance policy = buildPolicy(policyContext.getName(), policyContext.getLabel());
-        Struct.Builder structBuilder = Struct.newBuilder();
-        values.forEach(structBuilder::putFields);
+        Struct.Builder structBuilder = buildResourceContext(values);
 
         queryRequestBuilder.setPolicyInstance(policy);
         queryRequestBuilder.setResourceContext(structBuilder);
@@ -116,5 +122,12 @@ public class AuthzClient implements AuthorizerClient {
         policyContextBuilder.addAllDecisions(Arrays.asList(policyContext.getDecisions()));
 
         return policyContextBuilder.build();
+    }
+
+    private Struct.Builder buildResourceContext(Map<String, Value> values) {
+        Struct.Builder structBuilder = Struct.newBuilder();
+        values.forEach(structBuilder::putFields);
+
+        return structBuilder;
     }
 }
