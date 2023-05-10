@@ -3,10 +3,10 @@
 
 ## 0. prerequisites
 
-Ensure you are in the `examples` directory.
+Ensure you are in the `examples/authz-example` directory.
 
 ```bash
-cd examples
+cd examples/authz-example
 ```
 
 ## 1. building the examples
