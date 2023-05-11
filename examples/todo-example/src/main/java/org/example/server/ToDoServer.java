@@ -12,10 +12,7 @@ import java.net.InetSocketAddress;
 public class ToDoServer {
      private AuthorizerClient authzClient;
      public ToDoServer() throws IOException {
-          ManagedChannel channel = new ChannelBuilder()
-                  .withAddr("localhost:8282")
-                  .withInsecure(true)
-                  .build();
+          ManagedChannel channel = new ChannelBuilder().build();
 
           authzClient = new AuthzClient(channel);
 
