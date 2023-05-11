@@ -13,10 +13,6 @@ import java.util.Map;
 
 
 public class TodoHandler implements HttpHandler {
-    // Rick (rick@the-citadel.com) is an admin
-    // Morty is an editor
-    // Beth (beth@the-smiths.com) is a viewer
-    private static final String USER_EMAIL = "beth@the-smiths.com";
     private static final String ALLOWED = "allowed";
     private AuthzHelper authHelper;
 
@@ -47,7 +43,8 @@ public class TodoHandler implements HttpHandler {
     }
 
     private void postTodos(HttpExchange exchange) throws IOException {
-        IdentityCtx identityCtx = new IdentityCtx(USER_EMAIL, IdentityType.IDENTITY_TYPE_SUB);
+        String jwtToken = Utils.extractJwt(exchange);
+        IdentityCtx identityCtx = new IdentityCtx(jwtToken, IdentityType.IDENTITY_TYPE_JWT);
         PolicyCtx policyCtx = new PolicyCtx("todo", "todo", "todoApp.POST.todos", new String[]{ALLOWED});
 
         boolean allowed = authHelper.isAllowed(identityCtx, policyCtx);
@@ -60,7 +57,8 @@ public class TodoHandler implements HttpHandler {
     }
 
     private void putTodos(HttpExchange exchange) throws IOException {
-        IdentityCtx identityCtx = new IdentityCtx(USER_EMAIL, IdentityType.IDENTITY_TYPE_SUB);
+        String jwtToken = Utils.extractJwt(exchange);
+        IdentityCtx identityCtx = new IdentityCtx(jwtToken, IdentityType.IDENTITY_TYPE_JWT);
         PolicyCtx policyCtx = new PolicyCtx("todo", "todo", "todoApp.PUT.todos.__id", new String[]{ALLOWED});
         String personalId = extractPersonalId(exchange.getRequestURI().toString());
         Map<String, Value> resourceCtx = java.util.Map.of("personalId", Value.newBuilder().setStringValue(personalId).build());
@@ -75,7 +73,8 @@ public class TodoHandler implements HttpHandler {
     }
 
     private void deleteTodos(HttpExchange exchange) throws IOException {
-        IdentityCtx identityCtx = new IdentityCtx(USER_EMAIL, IdentityType.IDENTITY_TYPE_SUB);
+        String jwtToken = Utils.extractJwt(exchange);
+        IdentityCtx identityCtx = new IdentityCtx(jwtToken, IdentityType.IDENTITY_TYPE_JWT);
         PolicyCtx policyCtx = new PolicyCtx("todo", "todo", "todoApp.PUT.todos.__id", new String[]{ALLOWED});
         String personalId = extractPersonalId(exchange.getRequestURI().toString());
         Map<String, Value> resourceCtx = java.util.Map.of("personalId", Value.newBuilder().setStringValue(personalId).build());
