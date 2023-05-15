@@ -1,0 +1,32 @@
+[
+  {
+    "key": "CiRmZDA2MTRkMy1jMzlhLTQ3ODEtYjdiZC04Yjk2ZjVhNTEwMGQSBWxvY2Fs",
+    "name": "Rick Sanchez",
+    "email": "rick@the-citadel.com",
+    "picture": "https://github.com/aserto-demo/contoso-ad-sample/raw/main/UserImages/Rick%20Sanchez.jpg"
+  },
+  {
+    "key": "CiRmZDE2MTRkMy1jMzlhLTQ3ODEtYjdiZC04Yjk2ZjVhNTEwMGQSBWxvY2Fs",
+    "name": "Morty Smith",
+    "email": "morty@the-citadel.com",
+    "picture": "https://github.com/aserto-demo/contoso-ad-sample/raw/main/UserImages/Morty%20Smith.jpg"
+  },
+  {
+    "key": "CiRmZDM2MTRkMy1jMzlhLTQ3ODEtYjdiZC04Yjk2ZjVhNTEwMGQSBWxvY2Fs",
+    "name": "Beth Smith",
+    "email": "beth@the-smiths.com",
+    "picture": "https://github.com/aserto-demo/contoso-ad-sample/raw/main/UserImages/Beth%20Smith.jpg"
+  },
+  {
+    "key": "CiRmZDI2MTRkMy1jMzlhLTQ3ODEtYjdiZC04Yjk2ZjVhNTEwMGQSBWxvY2Fs",
+    "name": "Summer Smith",
+    "email": "summer@the-smiths.com",
+    "picture": "https://github.com/aserto-demo/contoso-ad-sample/raw/main/UserImages/Summer%20Smith.jpg"
+  },
+  {
+    "key": "CiRmZDQ2MTRkMy1jMzlhLTQ3ODEtYjdiZC04Yjk2ZjVhNTEwMGQSBWxvY2Fs",
+    "name": "Jerry Smith",
+    "email": "jerry@the-smiths.com",
+    "picture": "https://github.com/aserto-demo/contoso-ad-sample/raw/main/UserImages/Jerry%20Smith.jpg"
+  }
+]
