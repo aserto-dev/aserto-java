@@ -4,31 +4,28 @@ import com.aserto.AuthorizerClient;
 import com.aserto.authorizer.v2.api.IdentityType;
 import com.aserto.model.IdentityCtx;
 import com.aserto.model.PolicyCtx;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.Value;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import org.example.DatabaseHelper;
 import org.example.model.Todo;
-import org.example.model.User;
 
 import java.io.*;
-import java.util.HashMap;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.UUID;
 
 public class TodosHandler implements HttpHandler {
     private static final String ALLOWED = "allowed";
-
     private AuthzHelper authHelper;
-
+    private DatabaseHelper dbHelper;
     private ObjectMapper objectMapper;
-    private Map<String, Todo> todos;
-    private User[] users;
-    public TodosHandler(AuthorizerClient authzClient) {
+
+    public TodosHandler(AuthorizerClient authzClient, DatabaseHelper dbHelper) {
         authHelper = new AuthzHelper(authzClient);
+        this.dbHelper = dbHelper;
         objectMapper = new ObjectMapper();
-        todos = new HashMap<>();
     }
 
     @Override
@@ -65,7 +62,7 @@ public class TodosHandler implements HttpHandler {
 
         boolean allowed = authHelper.isAllowed(identityCtx, policyCtx);
         if (allowed)  {
-            String response = objectMapper.writeValueAsString(todos.values());
+            String response = objectMapper.writeValueAsString(dbHelper.getTodos());
 
             exchange.sendResponseHeaders(200, response.length());
             OutputStream outputStream = exchange.getResponseBody();
@@ -77,15 +74,11 @@ public class TodosHandler implements HttpHandler {
         }
     }
 
-    private String objectToJson(Todo[] todos) throws JsonProcessingException {
-        return objectMapper.writeValueAsString(todos);
-    }
-
     private void setOptions(HttpExchange exchange) throws IOException {
         exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "POST, GET, PATCH, OPTIONS, DELETE, PUT");
         exchange.getResponseHeaders().set("Access-Control-Allow-Credentials", "true");
         exchange.getResponseHeaders().set("Access-Control-Max-Age", "3600");
-        exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
+        exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, authorization");
         exchange.sendResponseHeaders(204, -1);
     }
 
@@ -93,25 +86,33 @@ public class TodosHandler implements HttpHandler {
         String jwtToken = Utils.extractJwt(exchange);
         IdentityCtx identityCtx = new IdentityCtx(jwtToken, IdentityType.IDENTITY_TYPE_JWT);
         PolicyCtx policyCtx = new PolicyCtx("todo", "todo", "todoApp.POST.todos", new String[]{ALLOWED});
-        String value = getResponseBody(exchange);
-
-        Todo todo = objectMapper.readValue(value, Todo.class);
-        todo.setId(UUID.randomUUID().toString());
-        //!TODO: set the ownerID to the user's ID
-        todo.setOwnerID("CiRmZDA2MTRkMy1jMzlhLTQ3ODEtYjdiZC04Yjk2ZjVhNTEwMGQSBWxvY2Fs");
-
-        todos.put(todo.getId(), todo);
 
         boolean allowed = authHelper.isAllowed(identityCtx, policyCtx);
         if (allowed)  {
-            exchange.sendResponseHeaders(200, 0);
+            String value = getResponseBody(exchange);
+
+            Todo todo = objectMapper.readValue(value, Todo.class);
+            todo.setId(UUID.randomUUID().toString());
+            //!TODO: set the ownerID to the user's ID
+            todo.setOwnerID("CiRmZDA2MTRkMy1jMzlhLTQ3ODEtYjdiZC04Yjk2ZjVhNTEwMGQSBWxvY2Fs");
+
+            dbHelper.saveTodo(todo);
+
+            String response = "{\"msg\":\"Todo created\"}";
+
+            exchange.sendResponseHeaders(200, response.length());
+
+            OutputStream outputStream = exchange.getResponseBody();
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+            outputStream.close();
         } else {
             exchange.sendResponseHeaders(403, 0);
         }
     }
 
     private String getResponseBody(HttpExchange exchange) throws IOException {
-        InputStreamReader isr =  new InputStreamReader(exchange.getRequestBody(),"utf-8");
+        InputStreamReader isr =  new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
         BufferedReader br = new BufferedReader(isr);
 
         int b;
@@ -135,7 +136,18 @@ public class TodosHandler implements HttpHandler {
 
         boolean allowed = authHelper.isAllowed(identityCtx, policyCtx, resourceCtx);
         if (allowed)  {
-            exchange.sendResponseHeaders(200, 0);
+            String value = getResponseBody(exchange);
+            Todo todo = objectMapper.readValue(value, Todo.class);
+            dbHelper.updateTodoById(todo.getId(), todo);
+
+            String response = "{\"msg\":\"Todo updated\"}";
+
+            exchange.sendResponseHeaders(200, response.length());
+
+            OutputStream outputStream = exchange.getResponseBody();
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+            outputStream.close();
         } else {
             exchange.sendResponseHeaders(403, 0);
         }
@@ -150,7 +162,17 @@ public class TodosHandler implements HttpHandler {
 
         boolean allowed = authHelper.isAllowed(identityCtx, policyCtx, resourceCtx);
         if (allowed)  {
-            exchange.sendResponseHeaders(200, 0);
+            String value = getResponseBody(exchange);
+            Todo todo = objectMapper.readValue(value, Todo.class);
+            dbHelper.deleteTodoById(todo.getId());
+
+            String response = "{\"msg\":\"Todo deleted\"}";
+
+            exchange.sendResponseHeaders(200, response.length());
+            OutputStream outputStream = exchange.getResponseBody();
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+            outputStream.close();
         } else {
             exchange.sendResponseHeaders(403, 0);
         }

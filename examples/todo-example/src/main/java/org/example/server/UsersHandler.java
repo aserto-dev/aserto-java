@@ -71,7 +71,7 @@ public class UsersHandler implements HttpHandler {
         exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "POST, GET, PATCH, OPTIONS, DELETE, PUT");
         exchange.getResponseHeaders().set("Access-Control-Allow-Credentials", "true");
         exchange.getResponseHeaders().set("Access-Control-Max-Age", "3600");
-        exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
+        exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, authorization");
         exchange.sendResponseHeaders(204, -1);
     }
 

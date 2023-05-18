@@ -1,8 +1,16 @@
 package org.example.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.*;
+import org.hibernate.annotations.GenericGenerator;
 
+@Entity
+@Table(name = "todo")
 public class Todo {
+    @Id
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @Column(name = "id", updatable = false, nullable = false)
     private String id;
     private String title;
     private String ownerID;
