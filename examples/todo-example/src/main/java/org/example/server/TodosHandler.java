@@ -4,17 +4,18 @@ import com.aserto.AuthorizerClient;
 import com.aserto.authorizer.v2.api.IdentityType;
 import com.aserto.model.IdentityCtx;
 import com.aserto.model.PolicyCtx;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.Value;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.example.DatabaseHelper;
 import org.example.model.Todo;
+import org.example.model.User;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.UUID;
 
 public class TodosHandler implements HttpHandler {
     private static final String ALLOWED = "allowed";
@@ -25,7 +26,7 @@ public class TodosHandler implements HttpHandler {
     public TodosHandler(AuthorizerClient authzClient, DatabaseHelper dbHelper) {
         authHelper = new AuthzHelper(authzClient);
         this.dbHelper = dbHelper;
-        objectMapper = new ObjectMapper();
+        objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     @Override
@@ -89,12 +90,13 @@ public class TodosHandler implements HttpHandler {
 
         boolean allowed = authHelper.isAllowed(identityCtx, policyCtx);
         if (allowed)  {
-            String value = getResponseBody(exchange);
+            JwtDecoder jwtDecoder = new JwtDecoder(jwtToken);
+            String payload = jwtDecoder.decodePayload();
+            User user = objectMapper.readValue(payload, User.class);
 
+            String value = getResponseBody(exchange);
             Todo todo = objectMapper.readValue(value, Todo.class);
-            todo.setId(UUID.randomUUID().toString());
-            //!TODO: set the ownerID to the user's ID
-            todo.setOwnerID("CiRmZDA2MTRkMy1jMzlhLTQ3ODEtYjdiZC04Yjk2ZjVhNTEwMGQSBWxvY2Fs");
+            todo.setOwnerID(user.getKey());
 
             dbHelper.saveTodo(todo);
 

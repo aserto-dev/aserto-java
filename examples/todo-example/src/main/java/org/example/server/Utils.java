@@ -7,6 +7,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Utils {
+    private Utils() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static String extractJwt(HttpExchange exchange) {
         Map<String, String> headersMap = getHeadersMap(exchange);
         String auth = headersMap.get("Authorization");
@@ -23,9 +27,7 @@ public class Utils {
         Headers headers = exchange.getRequestHeaders();
         Map<String, String> headersMap = new HashMap<>();
 
-        headers.forEach((key, value) -> {
-            headersMap.put(key, value.get(0));
-        });
+        headers.forEach((key, value) -> headersMap.put(key, value.get(0)));
 
         return headersMap;
     }

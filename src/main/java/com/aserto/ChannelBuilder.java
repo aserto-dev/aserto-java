@@ -1,6 +1,6 @@
 package com.aserto;
 
-import com.aserto.model.AuthorizerConfig;
+import com.aserto.model.Config;
 import io.grpc.ManagedChannel;
 import io.grpc.Metadata;
 import io.grpc.netty.GrpcSslContexts;
@@ -14,48 +14,54 @@ import java.io.File;
 
 
 public class ChannelBuilder {
-    private AuthorizerConfig authzConfig = new AuthorizerConfig();
-
+    private Config cfg;
 
     public ChannelBuilder() {
+        this.cfg = new Config();
     }
 
-    public ChannelBuilder(AuthorizerConfig authzConfig) {
-        this.authzConfig = authzConfig;
+    public ChannelBuilder(Config config) {
+        this.cfg = config;
     }
 
     public ChannelBuilder withTenantId(String tenantId) {
-        authzConfig.setTenantId(tenantId);
+        cfg.setTenantId(tenantId);
 
         return this;
     }
 
-    public ChannelBuilder withAddr(String address) {
-        authzConfig.setAddress(address);
+    public ChannelBuilder withHost(String host) {
+        cfg.setHost(host);
+
+        return this;
+    }
+
+    public ChannelBuilder withPort(int port) {
+        cfg.setPort(port);
 
         return this;
     }
 
     public ChannelBuilder withAPIKeyAuth(String apiKey) {
-        authzConfig.setApiKey(apiKey);
+        cfg.setApiKey(apiKey);
 
         return this;
     }
 
     public ChannelBuilder withTokenAuth(String token) {
-        authzConfig.setToken(token);
+        cfg.setToken(token);
 
         return this;
     }
 
     public ChannelBuilder withInsecure(Boolean insecure) {
-        authzConfig.setInsecure(insecure);
+        cfg.setInsecure(insecure);
 
         return this;
     }
 
     public ChannelBuilder withCACertPath(String caCertPath) {
-        authzConfig.setCaCertPath(caCertPath);
+        cfg.setCaCertPath(caCertPath);
 
         return this;
     }
@@ -64,20 +70,21 @@ public class ChannelBuilder {
         Metadata metadata = new Metadata();
         Metadata.Key<String> asertoTenantId = Metadata.Key.of("aserto-tenant-id", Metadata.ASCII_STRING_MARSHALLER);
         Metadata.Key<String> authorization = Metadata.Key.of("authorization", Metadata.ASCII_STRING_MARSHALLER);
-        metadata.put(asertoTenantId, authzConfig.getTenantId());
-        metadata.put(authorization, "basic " + authzConfig.getApiKey());
 
-        String address = authzConfig.getAddress();
-        String[] splittedAddress = address.split(":");
-        String addr = splittedAddress[0];
-        Integer port = Integer.parseInt(splittedAddress[1]);
+        if (cfg.getTenantId() != null) {
+            metadata.put(asertoTenantId, cfg.getTenantId());
+        }
+
+        if (cfg.getApiKey() != null) {
+            metadata.put(authorization, "basic " + cfg.getApiKey());
+        }
 
         NettyChannelBuilder channelBuilder = NettyChannelBuilder
-                .forAddress(addr, port)
+                .forAddress(cfg.getHost(), cfg.getPort())
                 .intercept(MetadataUtils.newAttachHeadersInterceptor(metadata));
 
-        boolean insecure = authzConfig.getInsecure();
-        boolean caSpecified  = !authzConfig.getCaCertPath().isEmpty();
+        boolean insecure = cfg.getInsecure();
+        boolean caSpecified  = !cfg.getCaCertPath().isEmpty();
 
         if (insecure) {
             SslContext context = GrpcSslContexts.forClient()
@@ -86,7 +93,7 @@ public class ChannelBuilder {
             channelBuilder.sslContext(context);
         } else if (caSpecified) {
             SslContext context = GrpcSslContexts.forClient()
-                    .trustManager(new File(authzConfig.getCaCertPath()))
+                    .trustManager(new File(cfg.getCaCertPath()))
                     .build();
             channelBuilder.sslContext(context);
         }
