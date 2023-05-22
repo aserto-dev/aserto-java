@@ -7,7 +7,6 @@ import com.aserto.model.IdentityCtx;
 import com.aserto.model.PolicyCtx;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.protobuf.Struct;
 import com.google.protobuf.Value;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
