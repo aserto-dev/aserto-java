@@ -1,31 +1,30 @@
 package org.example.server;
 
 import com.aserto.AuthorizerClient;
+import com.aserto.DirectoryClient;
 import com.aserto.authorizer.v2.api.IdentityType;
 import com.aserto.model.IdentityCtx;
 import com.aserto.model.PolicyCtx;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.Value;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import org.example.model.User;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.HashMap;
 import java.util.Map;
 
 public class UsersHandler implements HttpHandler {
     private static final String ALLOWED = "allowed";
     private AuthzHelper authHelper;
+    private DirectoryClient directoryClient;
     private ObjectMapper objectMapper;
-    private Map<String, User> users;
 
-    public UsersHandler(AuthorizerClient authzClient) {
+    public UsersHandler(AuthorizerClient authzClient, DirectoryClient directoryClient) {
         authHelper = new AuthzHelper(authzClient);
-        objectMapper = new ObjectMapper();
-        users = loadUsers();
+        this.directoryClient = directoryClient;
+        objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     @Override
@@ -54,7 +53,8 @@ public class UsersHandler implements HttpHandler {
 
         boolean allowed = authHelper.isAllowed(identityCtx, policyCtx, resourceCtx);
         if (allowed)  {
-            String response = objectMapper.writeValueAsString(users.get(personalId));
+            com.aserto.directory.common.v2.Object directoryUser = directoryClient.getObject(personalId, "user");
+            String response = objectMapper.writeValueAsString(directoryUser);
 
             exchange.sendResponseHeaders(200, response.length());
             OutputStream outputStream = exchange.getResponseBody();
@@ -78,21 +78,5 @@ public class UsersHandler implements HttpHandler {
     private String extractPersonalId(String url) {
         String[] parts = url.split("/");
         return parts[parts.length - 1];
-    }
-
-    private Map<String, User> loadUsers() {
-        try {
-            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("users.json");
-            User[] users = objectMapper.readValue(inputStream, User[].class);
-            Map<String, User> usersMap = new HashMap<>();
-            for (User user : users) {
-                usersMap.put(user.getKey(), user);
-            }
-
-            return usersMap;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 }

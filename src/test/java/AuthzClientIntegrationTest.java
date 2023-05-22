@@ -20,7 +20,8 @@ class AuthzClientIntegrationTest {
     void testBuildAuthzClient() throws IOException {
         // Arrange
         ManagedChannel channel = new ChannelBuilder()
-                .withAddr("localhost:8282")
+                .withHost("localhost")
+                .withPort(8282)
                 .withInsecure(false)
                 .withCACertPath(System.getProperty("user.home") + "/.config/topaz/certs/grpc-ca.crt")
                 .build();
@@ -40,7 +41,8 @@ class AuthzClientIntegrationTest {
     void testInsecureConnectionToInsecureClient() throws SSLException {
         // Arrange
         ManagedChannel channel = new ChannelBuilder()
-                .withAddr("localhost:8282")
+                .withHost("localhost")
+                .withPort(8282)
                 .withInsecure(true)
                 .build();
 
@@ -59,7 +61,8 @@ class AuthzClientIntegrationTest {
     void testFailWhenSecureConnectionToInsecureClient() throws SSLException {
         // Arrange
         ManagedChannel channel = new ChannelBuilder()
-                .withAddr("localhost:8282")
+                .withHost("localhost")
+                .withPort(8282)
                 .withInsecure(false)
                 .build();
 
