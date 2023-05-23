@@ -13,6 +13,7 @@ import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.GrpcCleanupRule;
 import org.junit.Rule;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -114,6 +115,7 @@ class AuthzClientTest {
                     }));
 
     private AuthorizerClient client;
+    private ManagedChannel channel;
 
     @BeforeEach
     public void setUp() throws IOException {
@@ -125,11 +127,16 @@ class AuthzClientTest {
                 .forName(serverName).directExecutor().addService(serviceImpl).build().start());
 
         // Create a client channel and register for automatic graceful shutdown.
-        ManagedChannel channel = grpcCleanup.register(
+        channel = grpcCleanup.register(
                 InProcessChannelBuilder.forName(serverName).directExecutor().build());
 
         // Create a HelloWorldClient using the in-process channel;
         client = new AuthzClient(channel);
+    }
+
+    @AfterEach
+    public void tearDown() throws Exception {
+        channel.shutdown();
     }
 
     @Test
@@ -143,7 +150,6 @@ class AuthzClientTest {
 
         // Act
         List<Decision> decisions = client.is(identityCtx, policyCtx);
-        client.close();
 
         // Assert
         assertTrue(compareLists(decisions, expectedDecisions));
@@ -160,7 +166,6 @@ class AuthzClientTest {
 
         // Act
         List<Decision> decisions = client.is(identityCtx, policyCtx);
-        client.close();
 
         // Assert
         assertTrue(compareLists(decisions, expectedDecisions));
@@ -177,7 +182,6 @@ class AuthzClientTest {
 
         // Act
         Struct queryResponse = client.query(query, policyCtx, values);
-        client.close();
 
         // Assert
         assertEquals(1, queryResponse.getFieldsCount());

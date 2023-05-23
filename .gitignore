@@ -29,3 +29,6 @@ hs_err_pid*
 
 # local databases
 mydb.db
+
+# Local config
+.env

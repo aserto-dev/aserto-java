@@ -10,7 +10,7 @@ import com.google.protobuf.Value;
 import java.util.List;
 import java.util.Map;
 
-public interface AuthorizerClient extends AutoCloseable {
+public interface AuthorizerClient {
     public List<Module> listPolicies(String policyName, String policyLabel);
     public Module getPolicy(String policyId);
     public List<Decision> is(IdentityCtx identityCtx, PolicyCtx policyCtx);

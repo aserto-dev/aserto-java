@@ -31,7 +31,7 @@ public class AuthzExample {
 
         // check if the identity is allowed to perform the action
         List<Decision> decisions = authzClient.is(identityCtx, policyCtx);
-        authzClient.close();
+        channel.shutdown();
 
         decisions.forEach(decision -> {
             String dec = decision.getDecision();
