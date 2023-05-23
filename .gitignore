@@ -26,9 +26,3 @@ hs_err_pid*
 
 # IDE specific
 .idea/
-
-# local databases
-mydb.db
-
-# Local config
-.env
