@@ -19,7 +19,6 @@ public class AuthzClient implements AuthorizerClient {
     private AuthorizerGrpc.AuthorizerBlockingStub client;
     public AuthzClient(ManagedChannel channel) {
         client = AuthorizerGrpc.newBlockingStub(channel);
-        AuthorizerGrpc.newStub(channel);
     }
 
     public List<Module> listPolicies(String policyName, String policyLabel) {
