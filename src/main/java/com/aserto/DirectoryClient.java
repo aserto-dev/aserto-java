@@ -1,9 +1,12 @@
 package com.aserto;
 
+import com.aserto.directory.common.v2.ObjectTypeIdentifier;
+import com.aserto.directory.common.v2.PaginationRequest;
 import com.aserto.directory.exporter.v2.ExporterGrpc;
 import com.aserto.directory.importer.v2.ImporterGrpc;
 import com.aserto.directory.reader.v2.*;
 import com.aserto.directory.writer.v2.WriterGrpc;
+import com.aserto.directory.common.v2.Object;
 import io.grpc.ManagedChannel;
 
 public class DirectoryClient {
@@ -34,12 +37,44 @@ public class DirectoryClient {
     public ExporterGrpc.ExporterBlockingStub getExporterClient() {
         return exporterClient;
     }
+    class Result<T> {
+        private T[] results;
+        private String nextPageToken;
 
-    public com.aserto.directory.common.v2.Object[] getObjects() {
+        public Result(T[] results, String nextPageToken) {
+            this.results = results;
+            this.nextPageToken = nextPageToken;
+        }
+
+        public T[] getResults() {
+            return results;
+        }
+
+        public String getNextPageToken() {
+            return nextPageToken;
+        }
+    }
+
+    public Result<Object> getObjects(String objectType, Integer pageSize, String nextPageToken) {
         GetObjectsRequest.Builder builder = GetObjectsRequest.newBuilder();
-        GetObjectsRequest request = builder.build();
-        GetObjectsResponse response = readerClient.getObjects(request);
 
-        return response.getResultsList().toArray(new com.aserto.directory.common.v2.Object[0]);
+        PaginationRequest paginationRequest = PaginationRequest.newBuilder()
+            .setSize(pageSize)
+            .setToken(nextPageToken)
+            .build();
+        ObjectTypeIdentifier objectIdentifier = ObjectTypeIdentifier.newBuilder()
+                .setName(objectType)
+                .build();
+
+        GetObjectsRequest request = builder
+                .setPage(paginationRequest)
+                .setParam(objectIdentifier)
+                .build();
+        GetObjectsResponse response = readerClient.getObjects(request);
+        String nextToken = response.getPage().getNextToken();
+
+
+        Object[] objects = response.getResultsList().toArray(new Object[0]);
+        return new Result<>(objects, nextToken);
     }
 }
