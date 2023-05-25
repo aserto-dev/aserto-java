@@ -17,8 +17,10 @@ import java.util.Map;
 
 public class AuthzClient implements AuthorizerClient {
     private AuthorizerGrpc.AuthorizerBlockingStub client;
+    private ManagedChannel channel;
     public AuthzClient(ManagedChannel channel) {
         client = AuthorizerGrpc.newBlockingStub(channel);
+        this.channel = channel;
     }
 
     public List<Module> listPolicies(String policyName, String policyLabel) {
@@ -92,6 +94,10 @@ public class AuthzClient implements AuthorizerClient {
         DecisionTreeResponse decisionTree = client.decisionTree(decisionTreeBuilder.build());
 
         return decisionTree.getPath().getFieldsMap();
+    }
+
+    public void close() {
+        channel.shutdown();
     }
 
     private PolicyInstance buildPolicy(String name, String label) {

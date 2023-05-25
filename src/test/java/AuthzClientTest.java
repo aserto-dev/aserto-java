@@ -115,7 +115,6 @@ class AuthzClientTest {
                     }));
 
     private AuthorizerClient client;
-    private ManagedChannel channel;
 
     @BeforeEach
     public void setUp() throws IOException {
@@ -127,7 +126,7 @@ class AuthzClientTest {
                 .forName(serverName).directExecutor().addService(serviceImpl).build().start());
 
         // Create a client channel and register for automatic graceful shutdown.
-        channel = grpcCleanup.register(
+        ManagedChannel channel = grpcCleanup.register(
                 InProcessChannelBuilder.forName(serverName).directExecutor().build());
 
         // Create a HelloWorldClient using the in-process channel;
@@ -136,7 +135,7 @@ class AuthzClientTest {
 
     @AfterEach
     public void tearDown() throws Exception {
-        channel.shutdown();
+        client.close();
     }
 
     @Test

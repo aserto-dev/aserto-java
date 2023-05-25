@@ -14,12 +14,14 @@ public class DirectoryClient {
     private WriterGrpc.WriterBlockingStub writerClient;
     private ImporterGrpc.ImporterBlockingStub importerClient;
     private ExporterGrpc.ExporterBlockingStub exporterClient;
+    private ManagedChannel channel;
 
     public DirectoryClient(ManagedChannel channel) {
         this.readerClient = ReaderGrpc.newBlockingStub(channel);
         this.writerClient = WriterGrpc.newBlockingStub(channel);
         this.importerClient = ImporterGrpc.newBlockingStub(channel);
         this.exporterClient = ExporterGrpc.newBlockingStub(channel);
+        this.channel = channel;
     }
 
     public ReaderGrpc.ReaderBlockingStub getReaderClient() {
@@ -76,5 +78,9 @@ public class DirectoryClient {
 
         Object[] objects = response.getResultsList().toArray(new Object[0]);
         return new Result<>(objects, nextToken);
+    }
+
+    public void close() {
+        channel.shutdown();
     }
 }

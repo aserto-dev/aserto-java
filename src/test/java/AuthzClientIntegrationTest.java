@@ -30,7 +30,7 @@ class AuthzClientIntegrationTest {
 
         // Act
         List<Module> policies = authzClient.listPolicies("todo", "todo");
-        channel.shutdown();
+        authzClient.close();
 
         // Assert
         assertEquals(6, policies.size());
@@ -50,7 +50,7 @@ class AuthzClientIntegrationTest {
 
         // Act
         List<Module> policies = authzClient.listPolicies("todo", "todo");
-        channel.shutdown();
+        authzClient.close();
 
         // Assert
         assertEquals(6, policies.size());
@@ -72,6 +72,6 @@ class AuthzClientIntegrationTest {
         StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> {
             authzClient.listPolicies("todo", "todo");
         });
-        channel.shutdown();
+        authzClient.close();
     }
 }

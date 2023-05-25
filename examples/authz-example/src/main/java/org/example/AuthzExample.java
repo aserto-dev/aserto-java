@@ -16,7 +16,8 @@ public class AuthzExample {
     public static void main(String[] args) throws Exception {
         // create a channel that has the connection details
         ManagedChannel channel = new ChannelBuilder()
-                .withAddr("localhost:8282")
+                .withHost("localhost")
+                .withPort(8282)
                 .withInsecure(true)
                 .build();
 
@@ -31,7 +32,7 @@ public class AuthzExample {
 
         // check if the identity is allowed to perform the action
         List<Decision> decisions = authzClient.is(identityCtx, policyCtx);
-        channel.shutdown();
+        authzClient.close();
 
         decisions.forEach(decision -> {
             String dec = decision.getDecision();
