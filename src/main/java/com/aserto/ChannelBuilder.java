@@ -48,12 +48,6 @@ public class ChannelBuilder {
         return this;
     }
 
-    public ChannelBuilder withTokenAuth(String token) {
-        cfg.setToken(token);
-
-        return this;
-    }
-
     public ChannelBuilder withInsecure(Boolean insecure) {
         cfg.setInsecure(insecure);
 
