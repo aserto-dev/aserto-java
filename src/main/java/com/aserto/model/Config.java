@@ -5,9 +5,9 @@ public class Config {
     private int port;
     private String apiKey;
     private String tenantId;
-    private String token = "";
+    private String token;
     private Boolean insecure = false;
-    private String caCertPath = "";
+    private String caCertPath;
 
     public Config() {
     }

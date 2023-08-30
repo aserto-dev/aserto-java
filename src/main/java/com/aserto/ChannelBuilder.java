@@ -75,8 +75,14 @@ public class ChannelBuilder {
             metadata.put(asertoTenantId, cfg.getTenantId());
         }
 
+        if (cfg.getApiKey() != null && cfg.getToken() != null) {
+            throw new IllegalArgumentException("ApiKey and Token cannot be both specified");
+        }
+
         if (cfg.getApiKey() != null) {
             metadata.put(authorization, "basic " + cfg.getApiKey());
+        } else if (cfg.getToken() != null) {
+            metadata.put(authorization, "bearer " + cfg.getToken());
         }
 
         NettyChannelBuilder channelBuilder = NettyChannelBuilder
