@@ -5,17 +5,19 @@ public class Config {
     private int port;
     private String apiKey;
     private String tenantId;
+    private String token = "";
     private Boolean insecure = false;
     private String caCertPath = "";
 
     public Config() {
     }
 
-    public Config(String host, int port, String apiKey, String tenantID, Boolean insecure, String caCertPath) {
+    public Config(String host, int port, String apiKey, String tenantID, String token, Boolean insecure, String caCertPath) {
         this.host = host;
         this.port = port;
         this.apiKey = apiKey;
         this.tenantId = tenantID;
+        this.token = token;
         this.insecure = insecure;
         this.caCertPath = caCertPath;
     }
@@ -50,6 +52,14 @@ public class Config {
 
     public void setTenantId(String tenantId) {
         this.tenantId = tenantId;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public Boolean getInsecure() {
