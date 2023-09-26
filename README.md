@@ -49,7 +49,8 @@ Start [topaz](https://github.com/aserto-dev/topaz)
 ```java
 // create a channel that has the connection details
 ManagedChannel channel = new ChannelBuilder()
-        .withAddr("localhost:8282")
+        .withHost("localhost")
+        .withPort(8282)
         .withInsecure(true)
         .build();
 
