@@ -6,7 +6,7 @@
 
     <groupId>com.aserto</groupId>
     <artifactId>aserto-java</artifactId>
-    <version>0.20.8</version>
+    <version>0.20.9</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Java SDK to interact with aserto services</description>
@@ -41,7 +41,7 @@
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <grpc.version>1.53.0</grpc.version>
+        <grpc.version>1.58.0</grpc.version>
         <exclude-tests>IntegrationTest</exclude-tests>
     </properties>
 
@@ -49,7 +49,7 @@
         <dependency>
             <groupId>com.aserto</groupId>
             <artifactId>java-authorizer</artifactId>
-            <version>0.20.5</version>
+            <version>0.20.6</version>
         </dependency>
         <dependency>
             <groupId>com.aserto</groupId>
@@ -57,24 +57,17 @@
             <version>0.0.1</version>
         </dependency>
 
-        <!-- Used to load .env files -->
-        <dependency>
-            <groupId>io.github.cdimascio</groupId>
-            <artifactId>dotenv-java</artifactId>
-            <version>2.3.2</version>
-        </dependency>
-
         <!-- Used for unit testing -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.2.0</version>
+            <version>5.10.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-runner</artifactId>
-            <version>1.2.0</version>
+            <version>1.10.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -83,10 +76,11 @@
             <version>${grpc.version}</version>
             <scope>test</scope>
         </dependency>
+        <!-- Version 3.y.z is compatible with Java 8 -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>3.4.0</version>
+            <version>3.12.4</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -108,7 +102,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>3.0.1</version>
+                        <version>3.1.0</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -139,7 +133,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.2.1</version>
+                <version>3.3.0</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -152,7 +146,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.5.0</version>
+                <version>3.6.0</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -180,7 +174,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.0</version>
+                <version>3.1.2</version>
                 <configuration>
                     <excludedGroups>${exclude-tests}</excludedGroups>
                 </configuration>
