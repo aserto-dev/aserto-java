@@ -16,7 +16,6 @@ Java library for Aserto services
 <dependency>
     <groupId>com.aserto</groupId>
     <artifactId>aserto-java</artifactId>
-    <version>0.20.5</version>
 </dependency>
 ```
 
