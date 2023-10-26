@@ -5,7 +5,7 @@ Java library for Aserto services
 
 > **Warning**
 > 
-> **0.20.5** is the latest version published to maven central. Versions starting with 1.0.z have been removed from maven central and are no longer available for download.
+> **0.20.9** is the latest version published to maven central. Versions starting with 1.0.z have been removed from maven central and are no longer available for download.
 
 ### Build
 `mvn clean install`
