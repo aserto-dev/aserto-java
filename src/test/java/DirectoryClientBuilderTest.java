@@ -1,4 +1,4 @@
-import com.aserto.DirClient;
+import com.aserto.DirClientBuilder;
 import io.grpc.ManagedChannel;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
@@ -12,7 +12,7 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.*;
 
 
-public class DirClientTest {
+public class DirectoryClientBuilderTest {
     @Rule
     public final GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
 
@@ -31,24 +31,24 @@ public class DirClientTest {
     @Test
     void createDirectoryClientWithReader() {
         // Arrange & Act
-        DirClient dirClient = new DirClient(channel, null, null, null);
+        DirClientBuilder dirClientBuilder = new DirClientBuilder(channel, null, null, null, null);
 
         // Assert
-        assertNotEquals(null, dirClient.getReaderClient());
-        assertNull(dirClient.getWriterClient());
-        assertNull(dirClient.getImporterClient());
-        assertNull(dirClient.getExporterClient());
+        assertNotEquals(null, dirClientBuilder.getReaderClient());
+        assertNull(dirClientBuilder.getWriterClient());
+        assertNull(dirClientBuilder.getImporterClient());
+        assertNull(dirClientBuilder.getExporterClient());
     }
 
     @Test
     void createDirectoryClientsWithSameChannel() {
         // Arrange & Act
-        DirClient dirClient = new DirClient(channel);
+        DirClientBuilder dirClientBuilder = new DirClientBuilder(channel);
 
         // Assert
-        assertNotEquals(null, dirClient.getReaderClient());
-        assertNotEquals(null, dirClient.getWriterClient());
-        assertNotEquals(null, dirClient.getImporterClient());
-        assertNotEquals(null, dirClient.getExporterClient());
+        assertNotEquals(null, dirClientBuilder.getReaderClient());
+        assertNotEquals(null, dirClientBuilder.getWriterClient());
+        assertNotEquals(null, dirClientBuilder.getImporterClient());
+        assertNotEquals(null, dirClientBuilder.getExporterClient());
     }
 }
