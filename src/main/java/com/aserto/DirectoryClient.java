@@ -52,6 +52,7 @@ public class DirectoryClient implements DirectoryClientReader, DirectoryClientWr
                 .build());
     }
 
+    @Override
     public GetObjectManyRequest getObjectManyRequest(List<ObjectIdentifier> objectIdentifiers) {
         return GetObjectManyRequest.newBuilder()
                 .addAllParam(new ObjectIdentifierList(objectIdentifiers))
@@ -125,6 +126,21 @@ public class DirectoryClient implements DirectoryClientReader, DirectoryClientWr
                 .setSubjectType(subjectType)
                 .setSubjectId(subjectId)
                 .setTrace(trace)
+                .build());
+    }
+
+    public GetGraphResponse getGraph(String anchorType, String anchorId, String objectType, String objectId,
+                                     String relation, String subjectType, String subjectId, String subjectRelation) {
+
+        return readerClient.getGraph(GetGraphRequest.newBuilder()
+                .setAnchorType(anchorType)
+                .setAnchorId(anchorId)
+                .setObjectType(objectType)
+                .setObjectId(objectId)
+                .setRelation(relation)
+                .setSubjectType(subjectType)
+                .setSubjectId(subjectId)
+                .setSubjectRelation(subjectRelation)
                 .build());
     }
 
@@ -221,8 +237,9 @@ public class DirectoryClient implements DirectoryClientReader, DirectoryClientWr
     public DeleteManifestRequest deleteManifest() {
         return DeleteManifestRequest.newBuilder().build();
     }
-    class ObjectIdentifierList implements Iterable<ObjectIdentifier> {
 
+
+    private class ObjectIdentifierList implements Iterable<ObjectIdentifier> {
         private List<ObjectIdentifier> objects;
 
         public ObjectIdentifierList(List<ObjectIdentifier> objects) {
@@ -254,19 +271,25 @@ public class DirectoryClient implements DirectoryClientReader, DirectoryClientWr
 //        System.out.println(getObjectResponse.toString());
 //        System.out.println(getManifestResponse.getBody().getData().toStringUtf8());
 
+//        ---------------------------
+//        List<ObjectIdentifier> objects = List.of(
+//                ObjectIdentifier.newBuilder()
+//                        .setObjectType("user")
+//                        .setObjectId("rick@the-citadel.com")
+//                        .build(),
+//                ObjectIdentifier.newBuilder()
+//                        .setObjectType("user")
+//                        .setObjectId("morty@the-citadel.com")
+//                        .build());
+//
+//        GetObjectManyRequest getObjectManyRequest = directoryClient.getObjectManyRequest(objects);
+//        System.out.println(getObjectManyRequest);
+//    --------------------------------------
 
-        List objects = List.of(
-                ObjectIdentifier.newBuilder()
-                        .setObjectType("user")
-                        .setObjectId("rick@the-citadel.com")
-                        .build(),
-                ObjectIdentifier.newBuilder()
-                        .setObjectType("user")
-                        .setObjectId("morty@the-citadel.com")
-                        .build());
+        GetGraphResponse getGraphResponse = directoryClient.getGraph("user", "rick@the-citadel.com", "user", "rick@the-citadel.com","", "", "", "");
+        System.out.println(getGraphResponse);
 
-        GetObjectManyRequest getObjectManyRequest = directoryClient.getObjectManyRequest(objects);
-        System.out.println(getObjectManyRequest);
+
     }
 
 
