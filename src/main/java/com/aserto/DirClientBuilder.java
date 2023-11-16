@@ -17,6 +17,7 @@ public class DirClientBuilder {
     private ImporterGrpc.ImporterBlockingStub importerClient;
     private ExporterGrpc.ExporterBlockingStub exporterClient;
     private ModelGrpc.ModelBlockingStub modelClient;
+    private ModelGrpc.ModelStub modelClientAsync;
     private ManagedChannel channel;
     private ManagedChannel readerChannel;
     private ManagedChannel writerChannel;
@@ -30,6 +31,7 @@ public class DirClientBuilder {
         this.importerClient = ImporterGrpc.newBlockingStub(channel);
         this.exporterClient = ExporterGrpc.newBlockingStub(channel);
         this.modelClient = ModelGrpc.newBlockingStub(channel);
+        this.modelClientAsync = ModelGrpc.newStub(channel);
         this.channel = channel;
     }
 
@@ -61,6 +63,7 @@ public class DirClientBuilder {
 
         if (modelClient != null) {
             this.modelClient = ModelGrpc.newBlockingStub(modelChannel);
+            this.modelClientAsync = ModelGrpc.newStub(modelChannel);
             this.modelChannel = modelChannel;
         }
     }
@@ -83,6 +86,10 @@ public class DirClientBuilder {
 
     public ModelGrpc.ModelBlockingStub getModelClient() {
         return modelClient;
+    }
+
+    public ModelGrpc.ModelStub getModelClientAsync() {
+        return modelClientAsync;
     }
 
     class Result<T> {

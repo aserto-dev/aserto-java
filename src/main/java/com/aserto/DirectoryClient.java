@@ -4,6 +4,7 @@ import com.aserto.directory.common.v3.ObjectIdentifier;
 import com.aserto.directory.common.v3.PaginationRequest;
 import com.aserto.directory.common.v3.Relation;
 import com.aserto.directory.exporter.v3.ExporterGrpc;
+import com.aserto.directory.importer.v3.ImportRequest;
 import com.aserto.directory.importer.v3.ImporterGrpc;
 import com.aserto.directory.model.v3.*;
 import com.aserto.directory.reader.v3.*;
@@ -15,23 +16,32 @@ import com.aserto.directory.common.v3.Object;
 
 import com.google.protobuf.Timestamp;
 import io.grpc.ManagedChannel;
+import io.grpc.stub.StreamObserver;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.net.ssl.SSLException;
 import java.time.Instant;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
-public class DirectoryClient implements DirectoryClientReader, DirectoryClientWriter, DirectoryClientManifest {
+public class DirectoryClient implements DirectoryClientReader, DirectoryClientWriter, DirectoryClientModel {
+    Logger logger = LogManager.getLogger(DirectoryClient.class);
     private ReaderGrpc.ReaderBlockingStub readerClient;
     private WriterGrpc.WriterBlockingStub writerClient;
     private ImporterGrpc.ImporterBlockingStub importerClient;
     private ExporterGrpc.ExporterBlockingStub exporterClient;
     private ModelGrpc.ModelBlockingStub modelClient;
+    private ModelGrpc.ModelStub modelClientAsync;
 
     public DirectoryClient(DirClientBuilder dirClientBuilder) {
         readerClient = dirClientBuilder.getReaderClient();
         writerClient = dirClientBuilder.getWriterClient();
         modelClient = dirClientBuilder.getModelClient();
+        modelClientAsync = dirClientBuilder.getModelClientAsync();
     }
 
 
@@ -129,9 +139,9 @@ public class DirectoryClient implements DirectoryClientReader, DirectoryClientWr
                 .build());
     }
 
+    @Override
     public GetGraphResponse getGraph(String anchorType, String anchorId, String objectType, String objectId,
                                      String relation, String subjectType, String subjectId, String subjectRelation) {
-
         return readerClient.getGraph(GetGraphRequest.newBuilder()
                 .setAnchorType(anchorType)
                 .setAnchorId(anchorId)
@@ -225,18 +235,51 @@ public class DirectoryClient implements DirectoryClientReader, DirectoryClientWr
     }
 
     @Override
-    public SetManifestRequest setManifest(String manifest) {
+    public SetManifestResponse setManifest(String manifest) throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+
+        StreamObserver<SetManifestResponse> readStream = new StreamObserver<SetManifestResponse>() {
+            @Override
+            public void onNext(SetManifestResponse setManifestResponse) {
+                logger.info("Received response: [{}] ", setManifestResponse.getResult());
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                logger.error("Error from server: [{}]: ", throwable.getMessage());
+            }
+
+            @Override
+            public void onCompleted() {
+                logger.trace("Server completed stream.");
+                latch.countDown();
+            }
+        };
+
+
         Body manifestBody = Body.newBuilder().setData(ByteString.copyFrom(manifest.getBytes())).build();
 
-        return SetManifestRequest.newBuilder()
-                .setBody(manifestBody)
-                .build();
+        StreamObserver<SetManifestRequest> writeStream = modelClientAsync.setManifest(readStream);
+        writeStream.onNext(SetManifestRequest.newBuilder().setBody(manifestBody).build());
+        writeStream.onCompleted();
+
+        boolean timedOut = !latch.await(5, TimeUnit.SECONDS);
+        if (timedOut) {
+            logger.error("Timed out waiting for server response.");
+        }
+
+        return null;
     }
 
     @Override
-    public DeleteManifestRequest deleteManifest() {
-        return DeleteManifestRequest.newBuilder().build();
+    public DeleteManifestResponse deleteManifest() {
+        return modelClient.deleteManifest(DeleteManifestRequest.newBuilder().build());
     }
+
+//    public ImportRequest importData() {
+//        return importerClient.
+//    }
+
 
 
     private class ObjectIdentifierList implements Iterable<ObjectIdentifier> {
@@ -254,7 +297,7 @@ public class DirectoryClient implements DirectoryClientReader, DirectoryClientWr
     }
 
 
-    public static void main(String[] args) throws SSLException {
+    public static void main(String[] args) throws SSLException, InterruptedException {
         // create a channel that has the connection details
         ManagedChannel channel = new ChannelBuilder()
                 .withHost("localhost")
@@ -267,7 +310,7 @@ public class DirectoryClient implements DirectoryClientReader, DirectoryClientWr
 
 //        GetObjectResponse getObjectResponse = directoryClient.getObject("user", "morty@the-citadel.com", false);
 //        GetManifestResponse getManifestResponse = directoryClient.getManifest();
-
+//
 //        System.out.println(getObjectResponse.toString());
 //        System.out.println(getManifestResponse.getBody().getData().toStringUtf8());
 
@@ -286,8 +329,45 @@ public class DirectoryClient implements DirectoryClientReader, DirectoryClientWr
 //        System.out.println(getObjectManyRequest);
 //    --------------------------------------
 
-        GetGraphResponse getGraphResponse = directoryClient.getGraph("user", "rick@the-citadel.com", "user", "rick@the-citadel.com","", "", "", "");
-        System.out.println(getGraphResponse);
+//        GetGraphResponse getGraphResponse = directoryClient.getGraph("user", "rick@the-citadel.com", "user", "rick@the-citadel.com","", "", "", "");
+//        System.out.println(getGraphResponse);
+//    ---------------------------------
+
+
+//        String manifest =  "# yaml-language-server: $schema=https://www.topaz.sh/schema/manifest.json\n" +
+//                "---\n" +
+//                "### model ###\n" +
+//                "model:\n" +
+//                "  version: 3\n" +
+//                "\n" +
+//                "### object type definitions ###\n" +
+//                "types:\n" +
+//                "  ### display_name: User ###\n" +
+//                "  user:\n" +
+//                "    relations:\n" +
+//                "      ### display_name: user#manager ###\n" +
+//                "      manager: user\n" +
+//                "\n" +
+//                "  ### display_name: Identity ###\n" +
+//                "  identity:\n" +
+//                "    relations:\n" +
+//                "      ### display_name: identity#identifier ###\n" +
+//                "      identifier: user\n" +
+//                "\n" +
+//                "  ### display_name: Group ###\n" +
+//                "  group:\n" +
+//                "    relations:\n" +
+//                "      ### display_name: group#member ###\n" +
+//                "      member: user";
+//
+//        directoryClient.setManifest(manifest);
+//
+//
+//        System.out.println(directoryClient.getManifest().getBody().getData().toStringUtf8());
+
+//    --------------------------------------
+
+
 
 
     }
