@@ -3,12 +3,17 @@ package com.aserto;
 import com.aserto.directory.common.v3.ObjectIdentifier;
 import com.aserto.directory.common.v3.PaginationRequest;
 import com.aserto.directory.common.v3.Relation;
+import com.aserto.directory.exporter.v3.ExportRequest;
+import com.aserto.directory.exporter.v3.ExportResponse;
 import com.aserto.directory.exporter.v3.ExporterGrpc;
+import com.aserto.directory.exporter.v3.Option;
 import com.aserto.directory.importer.v3.ImportRequest;
+import com.aserto.directory.importer.v3.ImportResponse;
 import com.aserto.directory.importer.v3.ImporterGrpc;
 import com.aserto.directory.model.v3.*;
 import com.aserto.directory.reader.v3.*;
 import com.aserto.directory.writer.v3.*;
+import com.aserto.model.ImportElement;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Struct;
 import com.aserto.directory.common.v3.Object;
@@ -17,7 +22,6 @@ import com.aserto.directory.common.v3.Object;
 import com.google.protobuf.Timestamp;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,28 +29,32 @@ import javax.net.ssl.SSLException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
-public class DirectoryClient implements DirectoryClientReader, DirectoryClientWriter, DirectoryClientModel {
+public class DirectoryClient implements DirectoryClientReader,
+        DirectoryClientWriter,
+        DirectoryClientModel,
+        DirectoryClientImporter {
     static final int MAX_CHUNK_SIZE = 65536;
     Logger logger = LogManager.getLogger(DirectoryClient.class);
     private ReaderGrpc.ReaderBlockingStub readerClient;
     private WriterGrpc.WriterBlockingStub writerClient;
-    private ImporterGrpc.ImporterBlockingStub importerClient;
+    private ImporterGrpc.ImporterStub importerClient;
     private ExporterGrpc.ExporterBlockingStub exporterClient;
     private ModelGrpc.ModelBlockingStub modelClient;
     private ModelGrpc.ModelStub modelClientAsync;
 
-    public DirectoryClient(DirClientBuilder dirClientBuilder) {
-        readerClient = dirClientBuilder.getReaderClient();
-        writerClient = dirClientBuilder.getWriterClient();
-        modelClient = dirClientBuilder.getModelClient();
-        modelClientAsync = dirClientBuilder.getModelClientAsync();
+    public DirectoryClient(DirectoryClientBuilder directoryClientBuilder) {
+        readerClient = directoryClientBuilder.getReaderClient();
+        writerClient = directoryClientBuilder.getWriterClient();
+        importerClient = directoryClientBuilder.getImporterClient();
+        exporterClient = directoryClientBuilder.getExporterClient();
+        modelClient = directoryClientBuilder.getModelClient();
+        modelClientAsync = directoryClientBuilder.getModelClientAsync();
     }
 
 
@@ -245,7 +253,7 @@ public class DirectoryClient implements DirectoryClientReader, DirectoryClientWr
     }
 
     @Override
-    public SetManifestResponse setManifest(String manifest) throws InterruptedException {
+    public void setManifest(String manifest) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
 
         StreamObserver<SetManifestResponse> readStream = new StreamObserver<SetManifestResponse>() {
@@ -278,12 +286,9 @@ public class DirectoryClient implements DirectoryClientReader, DirectoryClientWr
         writeStream.onCompleted();
 
         boolean timedOut = !latch.await(5, TimeUnit.SECONDS);
-
         if (timedOut) {
             logger.error("Timed out waiting for server response.");
         }
-
-        return null;
     }
 
 
@@ -292,9 +297,50 @@ public class DirectoryClient implements DirectoryClientReader, DirectoryClientWr
         return modelClient.deleteManifest(DeleteManifestRequest.newBuilder().build());
     }
 
-//    public ImportRequest importData() {
-//        return importerClient.
-//    }
+    @Override
+    public void importData(Stream<ImportElement> importStream) throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+        StreamObserver<ImportResponse> readStream = new StreamObserver<ImportResponse>() {
+            @Override
+            public void onNext(ImportResponse importResponse) {
+                logger.info("Received response: [{}] ", importResponse.getObject());
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                logger.error("Error from server: [{}]: ", throwable.getMessage());
+            }
+
+            @Override
+            public void onCompleted() {
+                logger.trace("Server completed importStream.");
+                latch.countDown();
+            }
+        };
+
+        StreamObserver<ImportRequest> writer = importerClient.import_(readStream);
+
+        importStream.forEach(importElement -> {
+            if (importElement.getObject() != null) {
+                writer.onNext(ImportRequest.newBuilder().setObject(importElement.getObject()).build());
+            } else if (importElement.getRelation() != null) {
+                writer.onNext(ImportRequest.newBuilder().setRelation(importElement.getRelation()).build());
+            }
+        });
+        writer.onCompleted();
+
+        boolean timedOut = !latch.await(5, TimeUnit.SECONDS);
+        if (timedOut) {
+            logger.error("Timed out waiting for server response.");
+        }
+    }
+
+    public Iterator<ExportResponse> exportData(Option options, Timestamp startFrom) {
+        return exporterClient.export(ExportRequest.newBuilder()
+                .setOptions(options.getNumber())
+                .setStartFrom(startFrom)
+                .build());
+    }
 
 
 
@@ -321,8 +367,8 @@ public class DirectoryClient implements DirectoryClientReader, DirectoryClientWr
                 .withInsecure(true)
                 .build();
 
-        DirClientBuilder dirClientBuilder = new DirClientBuilder(channel);
-        DirectoryClient directoryClient = new DirectoryClient(dirClientBuilder);
+        DirectoryClientBuilder directoryClientBuilder = new DirectoryClientBuilder(channel);
+        DirectoryClient directoryClient = new DirectoryClient(directoryClientBuilder);
 
 //        GetObjectResponse getObjectResponse = directoryClient.getObject("user", "morty@the-citadel.com", false);
 //        GetManifestResponse getManifestResponse = directoryClient.getManifest();
@@ -350,41 +396,69 @@ public class DirectoryClient implements DirectoryClientReader, DirectoryClientWr
 //    ---------------------------------
 
 
-        String manifest =  "# yaml-language-server: $schema=https://www.topaz.sh/schema/manifest.json\n" +
-                "---\n" +
-                "### model ###\n" +
-                "model:\n" +
-                "  version: 3\n" +
-                "\n" +
-                "### object type definitions ###\n" +
-                "types:\n" +
-                "  ### display_name: User ###\n" +
-                "  user:\n" +
-                "    relations:\n" +
-                "      ### display_name: user#manager ###\n" +
-                "      manager: user\n" +
-                "\n" +
-                "  ### display_name: Identity ###\n" +
-                "  identity:\n" +
-                "    relations:\n" +
-                "      ### display_name: identity#identifier ###\n" +
-                "      identifier: user\n" +
-                "\n" +
-                "  ### display_name: Group ###\n" +
-                "  group:\n" +
-                "    relations:\n" +
-                "      ### display_name: group#member ###\n" +
-                "      member: user";
-
-        directoryClient.setManifest(manifest);
-
-
-        System.out.println(directoryClient.getManifest().getBody().getData().toStringUtf8());
+//        String manifest =  "# yaml-language-server: $schema=https://www.topaz.sh/schema/manifest.json\n" +
+//                "---\n" +
+//                "### model ###\n" +
+//                "model:\n" +
+//                "  version: 3\n" +
+//                "\n" +
+//                "### object type definitions ###\n" +
+//                "types:\n" +
+//                "  ### display_name: User ###\n" +
+//                "  user:\n" +
+//                "    relations:\n" +
+//                "      ### display_name: user#manager ###\n" +
+//                "      manager: user\n" +
+//                "\n" +
+//                "  ### display_name: Identity ###\n" +
+//                "  identity:\n" +
+//                "    relations:\n" +
+//                "      ### display_name: identity#identifier ###\n" +
+//                "      identifier: user\n" +
+//                "\n" +
+//                "  ### display_name: Group ###\n" +
+//                "  group:\n" +
+//                "    relations:\n" +
+//                "      ### display_name: group#member ###\n" +
+//                "      member: user";
+//
+//        directoryClient.setManifest(manifest);
+//
+//
+//        System.out.println(directoryClient.getManifest().getBody().getData().toStringUtf8());
 
 //    --------------------------------------
 
 
+//        List<ImportElement> list = new ArrayList<>();
+//        Object user = Object.newBuilder()
+//                .setType("user")
+//                .setId("test@aserto.com").build();
+//        Relation managerRelation = Relation.newBuilder()
+//                .setObjectType("user")
+//                .setObjectId("test@aserto.com")
+//                .setRelation("manager")
+//                .setSubjectType("user")
+//                .setSubjectId("morty@the-citadel.com")
+//                .build();
+//
+//        list.add(new ImportElement(user));
+//        list.add(new ImportElement(managerRelation));
+//
+//        directoryClient.importData(list.stream());
+//
+//
+//        directoryClient.getObjects("user", 10, "");
+//        directoryClient.getObject("user", "test@aserto.com", true);
 
+//        ---------------------------------------
+//        directoryClient.setObject("user", "test", "test", Struct.newBuilder().build(), "");
+
+
+//        -----------------------------------
+        Iterator<ExportResponse> exportedData = directoryClient.exportData( Option.OPTION_DATA, Timestamp.newBuilder().setSeconds(0).setNanos(0).build());
+        exportedData.forEachRemaining(System.out::println);
+//        -----------------------------------
 
     }
 

@@ -1,4 +1,4 @@
-import com.aserto.DirClientBuilder;
+import com.aserto.DirectoryClientBuilder;
 import io.grpc.ManagedChannel;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
@@ -31,24 +31,24 @@ public class DirectoryClientBuilderTest {
     @Test
     void createDirectoryClientWithReader() {
         // Arrange & Act
-        DirClientBuilder dirClientBuilder = new DirClientBuilder(channel, null, null, null, null);
+        DirectoryClientBuilder directoryClientBuilder = new DirectoryClientBuilder(channel, null, null, null, null);
 
         // Assert
-        assertNotEquals(null, dirClientBuilder.getReaderClient());
-        assertNull(dirClientBuilder.getWriterClient());
-        assertNull(dirClientBuilder.getImporterClient());
-        assertNull(dirClientBuilder.getExporterClient());
+        assertNotEquals(null, directoryClientBuilder.getReaderClient());
+        assertNull(directoryClientBuilder.getWriterClient());
+        assertNull(directoryClientBuilder.getImporterClient());
+        assertNull(directoryClientBuilder.getExporterClient());
     }
 
     @Test
     void createDirectoryClientsWithSameChannel() {
         // Arrange & Act
-        DirClientBuilder dirClientBuilder = new DirClientBuilder(channel);
+        DirectoryClientBuilder directoryClientBuilder = new DirectoryClientBuilder(channel);
 
         // Assert
-        assertNotEquals(null, dirClientBuilder.getReaderClient());
-        assertNotEquals(null, dirClientBuilder.getWriterClient());
-        assertNotEquals(null, dirClientBuilder.getImporterClient());
-        assertNotEquals(null, dirClientBuilder.getExporterClient());
+        assertNotEquals(null, directoryClientBuilder.getReaderClient());
+        assertNotEquals(null, directoryClientBuilder.getWriterClient());
+        assertNotEquals(null, directoryClientBuilder.getImporterClient());
+        assertNotEquals(null, directoryClientBuilder.getExporterClient());
     }
 }

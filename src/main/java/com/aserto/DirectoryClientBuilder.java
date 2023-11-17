@@ -7,7 +7,7 @@ import com.aserto.directory.reader.v3.*;
 import com.aserto.directory.writer.v3.WriterGrpc;
 import io.grpc.ManagedChannel;
 
-public class DirClientBuilder {
+public class DirectoryClientBuilder {
     private ReaderGrpc.ReaderBlockingStub readerClient;
     private WriterGrpc.WriterBlockingStub writerClient;
     private ImporterGrpc.ImporterStub importerClient;
@@ -21,7 +21,7 @@ public class DirClientBuilder {
     private ManagedChannel exporterChannel;
     private ManagedChannel modelChannel;
 
-    public DirClientBuilder(ManagedChannel channel) {
+    public DirectoryClientBuilder(ManagedChannel channel) {
         this.readerClient = ReaderGrpc.newBlockingStub(channel);
         this.writerClient = WriterGrpc.newBlockingStub(channel);
         this.importerClient = ImporterGrpc.newStub(channel);
@@ -31,11 +31,11 @@ public class DirClientBuilder {
         this.channel = channel;
     }
 
-    public DirClientBuilder(ManagedChannel readerChannel,
-                            ManagedChannel writerChannel,
-                            ManagedChannel importerChannel,
-                            ManagedChannel exporterChannel,
-                            ManagedChannel modelChannel) {
+    public DirectoryClientBuilder(ManagedChannel readerChannel,
+                                  ManagedChannel writerChannel,
+                                  ManagedChannel importerChannel,
+                                  ManagedChannel exporterChannel,
+                                  ManagedChannel modelChannel) {
 
         if (readerChannel != null) {
             this.readerClient = ReaderGrpc.newBlockingStub(readerChannel);
