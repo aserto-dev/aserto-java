@@ -22,13 +22,18 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.net.ssl.SSLException;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 
 public class DirectoryClient implements DirectoryClientReader, DirectoryClientWriter, DirectoryClientModel {
+    static final int MAX_CHUNK_SIZE = 65536;
     Logger logger = LogManager.getLogger(DirectoryClient.class);
     private ReaderGrpc.ReaderBlockingStub readerClient;
     private WriterGrpc.WriterBlockingStub writerClient;
@@ -214,19 +219,24 @@ public class DirectoryClient implements DirectoryClientReader, DirectoryClientWr
         GetManifestRequest manifestRequest = GetManifestRequest.newBuilder().build();
         Iterator<GetManifestResponse> manifestResponses =  modelClient.getManifest(manifestRequest);
 
-        StringBuilder bodyBuilder = new StringBuilder();
         Metadata.Builder metadataBuilder =  Metadata.newBuilder();
 
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
         manifestResponses.forEachRemaining(manifestResponse -> {
             if (!manifestResponse.getMetadata().getAllFields().isEmpty()) {
                 manifestResponse.getMetadata().getAllFields().forEach(metadataBuilder::setField);
             } else if (!manifestResponse.getBody().getData().isEmpty()) {
-                bodyBuilder.append(manifestResponse.getBody().getData().toStringUtf8());
+                try {
+                    outputStream.write(manifestResponse.getBody().getData().toByteArray());
+                } catch (IOException e) {
+                    logger.error("Could not write to stream the fallowing message: {}", manifestResponse.getBody().getData().toByteArray());
+                    throw new RuntimeException(e);
+                }
             }
         });
 
-
-        Body manifestBody = Body.newBuilder().setData(ByteString.copyFrom(bodyBuilder.toString().getBytes())).build();
+        Body manifestBody = Body.newBuilder().setData(ByteString.copyFrom(outputStream.toByteArray())).build();
 
         return GetManifestResponse.newBuilder()
                 .setMetadata(metadataBuilder.build())
@@ -256,20 +266,26 @@ public class DirectoryClient implements DirectoryClientReader, DirectoryClientWr
             }
         };
 
-
-        Body manifestBody = Body.newBuilder().setData(ByteString.copyFrom(manifest.getBytes())).build();
-
         StreamObserver<SetManifestRequest> writeStream = modelClientAsync.setManifest(readStream);
-        writeStream.onNext(SetManifestRequest.newBuilder().setBody(manifestBody).build());
+        
+        MessageChunker chunker = new MessageChunker(MAX_CHUNK_SIZE, manifest.getBytes());
+        while (chunker.hasNextChunk()) {
+            byte[] chunk = chunker.nextChunk();
+            Body manifestBody = Body.newBuilder().setData(ByteString.copyFrom(chunk)).build();
+            writeStream.onNext(SetManifestRequest.newBuilder().setBody(manifestBody).build());
+        }
+
         writeStream.onCompleted();
 
         boolean timedOut = !latch.await(5, TimeUnit.SECONDS);
+
         if (timedOut) {
             logger.error("Timed out waiting for server response.");
         }
 
         return null;
     }
+
 
     @Override
     public DeleteManifestResponse deleteManifest() {
@@ -334,36 +350,36 @@ public class DirectoryClient implements DirectoryClientReader, DirectoryClientWr
 //    ---------------------------------
 
 
-//        String manifest =  "# yaml-language-server: $schema=https://www.topaz.sh/schema/manifest.json\n" +
-//                "---\n" +
-//                "### model ###\n" +
-//                "model:\n" +
-//                "  version: 3\n" +
-//                "\n" +
-//                "### object type definitions ###\n" +
-//                "types:\n" +
-//                "  ### display_name: User ###\n" +
-//                "  user:\n" +
-//                "    relations:\n" +
-//                "      ### display_name: user#manager ###\n" +
-//                "      manager: user\n" +
-//                "\n" +
-//                "  ### display_name: Identity ###\n" +
-//                "  identity:\n" +
-//                "    relations:\n" +
-//                "      ### display_name: identity#identifier ###\n" +
-//                "      identifier: user\n" +
-//                "\n" +
-//                "  ### display_name: Group ###\n" +
-//                "  group:\n" +
-//                "    relations:\n" +
-//                "      ### display_name: group#member ###\n" +
-//                "      member: user";
-//
-//        directoryClient.setManifest(manifest);
-//
-//
-//        System.out.println(directoryClient.getManifest().getBody().getData().toStringUtf8());
+        String manifest =  "# yaml-language-server: $schema=https://www.topaz.sh/schema/manifest.json\n" +
+                "---\n" +
+                "### model ###\n" +
+                "model:\n" +
+                "  version: 3\n" +
+                "\n" +
+                "### object type definitions ###\n" +
+                "types:\n" +
+                "  ### display_name: User ###\n" +
+                "  user:\n" +
+                "    relations:\n" +
+                "      ### display_name: user#manager ###\n" +
+                "      manager: user\n" +
+                "\n" +
+                "  ### display_name: Identity ###\n" +
+                "  identity:\n" +
+                "    relations:\n" +
+                "      ### display_name: identity#identifier ###\n" +
+                "      identifier: user\n" +
+                "\n" +
+                "  ### display_name: Group ###\n" +
+                "  group:\n" +
+                "    relations:\n" +
+                "      ### display_name: group#member ###\n" +
+                "      member: user";
+
+        directoryClient.setManifest(manifest);
+
+
+        System.out.println(directoryClient.getManifest().getBody().getData().toStringUtf8());
 
 //    --------------------------------------
 

@@ -1,20 +1,16 @@
 package com.aserto;
 
-//import com.aserto.directory.common.v3.ObjectTypeIdentifier;
-import com.aserto.directory.common.v2.ObjectTypeIdentifier;
-import com.aserto.directory.common.v3.PaginationRequest;
 import com.aserto.directory.exporter.v3.ExporterGrpc;
 import com.aserto.directory.importer.v3.ImporterGrpc;
 import com.aserto.directory.model.v3.ModelGrpc;
 import com.aserto.directory.reader.v3.*;
 import com.aserto.directory.writer.v3.WriterGrpc;
-import com.aserto.directory.common.v3.Object;
 import io.grpc.ManagedChannel;
 
 public class DirClientBuilder {
     private ReaderGrpc.ReaderBlockingStub readerClient;
     private WriterGrpc.WriterBlockingStub writerClient;
-    private ImporterGrpc.ImporterBlockingStub importerClient;
+    private ImporterGrpc.ImporterStub importerClient;
     private ExporterGrpc.ExporterBlockingStub exporterClient;
     private ModelGrpc.ModelBlockingStub modelClient;
     private ModelGrpc.ModelStub modelClientAsync;
@@ -28,7 +24,7 @@ public class DirClientBuilder {
     public DirClientBuilder(ManagedChannel channel) {
         this.readerClient = ReaderGrpc.newBlockingStub(channel);
         this.writerClient = WriterGrpc.newBlockingStub(channel);
-        this.importerClient = ImporterGrpc.newBlockingStub(channel);
+        this.importerClient = ImporterGrpc.newStub(channel);
         this.exporterClient = ExporterGrpc.newBlockingStub(channel);
         this.modelClient = ModelGrpc.newBlockingStub(channel);
         this.modelClientAsync = ModelGrpc.newStub(channel);
@@ -52,7 +48,7 @@ public class DirClientBuilder {
         }
 
         if (importerChannel != null) {
-            this.importerClient = ImporterGrpc.newBlockingStub(importerChannel);
+            this.importerClient = ImporterGrpc.newStub(importerChannel);
             this.importerChannel = importerChannel;
         }
 
@@ -76,7 +72,7 @@ public class DirClientBuilder {
         return writerClient;
     }
 
-    public ImporterGrpc.ImporterBlockingStub getImporterClient() {
+    public ImporterGrpc.ImporterStub getImporterClient() {
         return importerClient;
     }
 
@@ -109,29 +105,6 @@ public class DirClientBuilder {
             return nextPageToken;
         }
     }
-
-//    public Result<Object> getObjects(String objectType, Integer pageSize, String nextPageToken) {
-//        GetObjectsRequest.Builder builder = GetObjectsRequest.newBuilder();
-//
-//        PaginationRequest paginationRequest = PaginationRequest.newBuilder()
-//            .setSize(pageSize)
-//            .setToken(nextPageToken)
-//            .build();
-//        ObjectTypeIdentifier objectIdentifier = ObjectTypeIdentifier.newBuilder()
-//                .setName(objectType)
-//                .build();
-//
-//        GetObjectsRequest request = builder
-//                .setPage(paginationRequest)
-//                .setParam(objectIdentifier)
-//                .build();
-//        GetObjectsResponse response = readerClient.getObjects(request);
-//        String nextToken = response.getPage().getNextToken();
-//
-//
-//        Object[] objects = response.getResultsList().toArray(new Object[0]);
-//        return new Result<>(objects, nextToken);
-//    }
 
     public void close() {
         if (channel != null) {
