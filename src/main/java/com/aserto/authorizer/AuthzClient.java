@@ -1,5 +1,6 @@
-package com.aserto;
+package com.aserto.authorizer;
 
+import com.aserto.AuthorizerClient;
 import com.aserto.authorizer.v2.*;
 import com.aserto.authorizer.v2.Decision;
 import com.aserto.authorizer.v2.api.*;

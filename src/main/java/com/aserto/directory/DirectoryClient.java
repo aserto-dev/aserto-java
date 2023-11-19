@@ -1,5 +1,7 @@
-package com.aserto;
+package com.aserto.directory;
 
+import com.aserto.ChannelBuilder;
+import com.aserto.utils.MessageChunker;
 import com.aserto.directory.common.v3.ObjectIdentifier;
 import com.aserto.directory.common.v3.PaginationRequest;
 import com.aserto.directory.common.v3.Relation;

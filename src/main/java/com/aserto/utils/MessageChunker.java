@@ -1,5 +1,6 @@
-package com.aserto;
+package com.aserto.utils;
 
+/* Chunk messages into smaller pieces. */
 public class MessageChunker {
     private int maxChunkSize;
     private byte[] message;

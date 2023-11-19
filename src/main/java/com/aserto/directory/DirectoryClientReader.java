@@ -1,4 +1,4 @@
-package com.aserto;
+package com.aserto.directory;
 
 import com.aserto.directory.common.v3.ObjectIdentifier;
 import com.aserto.directory.reader.v3.*;

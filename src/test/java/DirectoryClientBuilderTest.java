@@ -1,4 +1,4 @@
-import com.aserto.DirectoryClientBuilder;
+import com.aserto.directory.DirectoryClientBuilder;
 import io.grpc.ManagedChannel;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;

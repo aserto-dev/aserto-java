@@ -1,4 +1,4 @@
-package com.aserto;
+package com.aserto.directory;
 
 import com.aserto.directory.writer.v3.DeleteObjectResponse;
 import com.aserto.directory.writer.v3.DeleteRelationResponse;

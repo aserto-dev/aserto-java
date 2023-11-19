@@ -1,4 +1,4 @@
-import com.aserto.AuthzClient;
+import com.aserto.authorizer.AuthzClient;
 import com.aserto.ChannelBuilder;
 import com.aserto.authorizer.v2.api.Module;
 import io.grpc.ManagedChannel;

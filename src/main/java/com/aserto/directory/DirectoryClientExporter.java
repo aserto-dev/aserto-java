@@ -1,4 +1,4 @@
-package com.aserto;
+package com.aserto.directory;
 
 import com.aserto.directory.exporter.v3.ExportResponse;
 import com.google.protobuf.Timestamp;
