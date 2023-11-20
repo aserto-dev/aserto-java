@@ -10,7 +10,7 @@ public interface DirectoryClientReader {
     public GetObjectResponse getObject(String type, String id, boolean withRelations);
     public GetObjectsResponse getObjects(String type);
     public GetObjectsResponse getObjects(String type, int pageSize, String pageToken);
-    public GetObjectManyRequest getObjectManyRequest(List<ObjectIdentifier> objectIdentifiers);
+    public GetObjectManyResponse getObjectManyRequest(List<ObjectIdentifier> objectIdentifiers);
     public GetRelationResponse getRelation(String objectType, String objectId, String relationName, String subjectType,
                                            String subjectId, String subjectRelation);
     public GetRelationResponse getRelation(String objectType, String objectId, String relationName, String subjectType,

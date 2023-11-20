@@ -89,10 +89,10 @@ public class DirectoryClient implements DirectoryClientReader,
     }
 
     @Override
-    public GetObjectManyRequest getObjectManyRequest(List<ObjectIdentifier> objectIdentifiers) {
-        return GetObjectManyRequest.newBuilder()
+    public GetObjectManyResponse getObjectManyRequest(List<ObjectIdentifier> objectIdentifiers) {
+        return readerClient.getObjectMany(GetObjectManyRequest.newBuilder()
                 .addAllParam(new ObjectIdentifierList(objectIdentifiers))
-                .build();
+                .build());
     }
 
     private PaginationRequest buildPaginationRequest(int pageSize, String pageToken) {
