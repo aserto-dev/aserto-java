@@ -15,11 +15,8 @@ public interface DirectoryClientReader {
                                            String subjectId, String subjectRelation);
     public GetRelationResponse getRelation(String objectType, String objectId, String relationName, String subjectType,
                                            String subjectId, String subjectRelation, boolean withObjects);
-    public GetRelationsResponse getRelations(String objectType, String objectId, String relationName,
-                                             String subjectType, String subjectId, String subjectRelation, boolean withObjects);
-    public GetRelationsResponse getRelations(String objectType, String objectId, String relationName,
-                                             String subjectType, String subjectId, String subjectRelation,
-                                             boolean withObjects, int pageSize, String pageToken);
+    public GetRelationsResponse getRelations(GetRelationsRequest relationsRequest);
+
     public CheckPermissionResponse checkPermission(String objectType, String objectId, String subjectType,
                                                    String subjectId, String permissionName);
     public CheckPermissionResponse checkPermission(String objectType, String objectId,

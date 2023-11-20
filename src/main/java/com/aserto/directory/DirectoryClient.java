@@ -102,7 +102,6 @@ public class DirectoryClient implements DirectoryClientReader,
                 .build();
     }
 
-
     @Override
     public GetRelationResponse getRelation(String objectType, String objectId, String relationName, String subjectType, String subjectId, String subjectRelation) {
         return getRelation(objectType, objectId, relationName, subjectType, subjectId, subjectRelation, false);
@@ -121,22 +120,8 @@ public class DirectoryClient implements DirectoryClientReader,
     }
 
     @Override
-    public GetRelationsResponse getRelations(String objectType, String objectId, String relationName, String subjectType, String subjectId, String subjectRelation, boolean withObjects) {
-        return getRelations(objectType, objectId, relationName, subjectType, subjectId, subjectRelation, withObjects, 100, "");
-    }
-
-    @Override
-    public GetRelationsResponse getRelations(String objectType, String objectId, String relationName, String subjectType, String subjectId, String subjectRelation, boolean withObjects, int pageSize, String pageToken) {
-        return readerClient.getRelations(GetRelationsRequest.newBuilder()
-                .setObjectType(objectType)
-                .setObjectId(objectId)
-                .setRelation(relationName)
-                .setSubjectType(subjectType)
-                .setSubjectId(subjectId)
-                .setSubjectRelation(subjectRelation)
-                .setWithObjects(withObjects)
-                .setPage(buildPaginationRequest(pageSize, pageToken))
-                .build());
+    public GetRelationsResponse getRelations(GetRelationsRequest relationsRequest) {
+        return readerClient.getRelations(relationsRequest);
     }
 
     @Override
