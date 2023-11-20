@@ -50,16 +50,22 @@ public class DirectoryClient implements DirectoryClientReader,
     private ModelGrpc.ModelBlockingStub modelClient;
     private ModelGrpc.ModelStub modelClientAsync;
 
-    public DirectoryClient(DirectoryClientBuilder directoryClientBuilder) {
-        readerClient = directoryClientBuilder.getReaderClient();
-        writerClient = directoryClientBuilder.getWriterClient();
-        importerClient = directoryClientBuilder.getImporterClient();
-        exporterClient = directoryClientBuilder.getExporterClient();
-        modelClient = directoryClientBuilder.getModelClient();
-        modelClientAsync = directoryClientBuilder.getModelClientAsync();
+    public DirectoryClient(ManagedChannel channelBuilder) {
+        DirectoryClientBuilder dirClientBuilder = new DirectoryClientBuilder(channelBuilder);
+        readerClient = dirClientBuilder.getReaderClient();
+        writerClient = dirClientBuilder.getWriterClient();
+        importerClient = dirClientBuilder.getImporterClient();
+        exporterClient = dirClientBuilder.getExporterClient();
+        modelClient = dirClientBuilder.getModelClient();
+        modelClientAsync = dirClientBuilder.getModelClientAsync();
     }
 
 
+
+    @Override
+    public GetObjectResponse getObject(String type, String id) {
+        return getObject(type, id, false);
+    }
     @Override
     public GetObjectResponse getObject(String type, String id, boolean withRelations) {
         return readerClient.getObject(GetObjectRequest.newBuilder()
@@ -67,6 +73,11 @@ public class DirectoryClient implements DirectoryClientReader,
                 .setObjectId(id)
                 .setWithRelations(withRelations)
                 .build());
+    }
+
+    @Override
+    public GetObjectsResponse getObjects(String type) {
+        return getObjects(type, 100, "");
     }
 
     @Override
@@ -91,6 +102,11 @@ public class DirectoryClient implements DirectoryClientReader,
                 .build();
     }
 
+
+    @Override
+    public GetRelationResponse getRelation(String objectType, String objectId, String relationName, String subjectType, String subjectId, String subjectRelation) {
+        return getRelation(objectType, objectId, relationName, subjectType, subjectId, subjectRelation, false);
+    }
     @Override
     public GetRelationResponse getRelation(String objectType, String objectId, String relationName, String subjectType, String subjectId, String subjectRelation, boolean withObjects) {
         return readerClient.getRelation(GetRelationRequest.newBuilder()
@@ -102,6 +118,11 @@ public class DirectoryClient implements DirectoryClientReader,
                 .setSubjectRelation(subjectRelation)
                 .setWithObjects(withObjects)
                 .build());
+    }
+
+    @Override
+    public GetRelationsResponse getRelations(String objectType, String objectId, String relationName, String subjectType, String subjectId, String subjectRelation, boolean withObjects) {
+        return getRelations(objectType, objectId, relationName, subjectType, subjectId, subjectRelation, withObjects, 100, "");
     }
 
     @Override
@@ -119,6 +140,11 @@ public class DirectoryClient implements DirectoryClientReader,
     }
 
     @Override
+    public CheckPermissionResponse checkPermission(String objectType, String objectId, String subjectType, String subjectId, String permissionName) {
+        return checkPermission(objectType, objectId, subjectType, subjectId, permissionName, false);
+    }
+
+    @Override
     public CheckPermissionResponse checkPermission(String objectType, String objectId, String subjectType, String subjectId, String permissionName, boolean trace) {
         return readerClient.checkPermission(CheckPermissionRequest.newBuilder()
                 .setObjectType(objectType)
@@ -131,6 +157,11 @@ public class DirectoryClient implements DirectoryClientReader,
     }
 
     @Override
+    public CheckRelationResponse checkRelation(String objectType, String objectId, String relationName, String subjectType, String subjectId) {
+        return checkRelation(objectType, objectId, relationName, subjectType, subjectId, false);
+    }
+
+    @Override
     public CheckRelationResponse checkRelation(String objectType, String objectId, String relationName, String subjectType, String subjectId, boolean trace) {
         return readerClient.checkRelation(CheckRelationRequest.newBuilder()
                 .setObjectType(objectType)
@@ -140,6 +171,11 @@ public class DirectoryClient implements DirectoryClientReader,
                 .setSubjectId(subjectId)
                 .setTrace(trace)
                 .build());
+    }
+
+    @Override
+    public CheckResponse check(String objectType, String objectId, String relationName, String subjectType, String subjectId) {
+        return check(objectType, objectId, relationName, subjectType, subjectId, false);
     }
 
     @Override
@@ -189,12 +225,31 @@ public class DirectoryClient implements DirectoryClientReader,
     }
 
     @Override
+    public DeleteObjectResponse deleteObject(String type, String id) {
+        return deleteObject(type, id, false);
+    }
+
+    @Override
     public DeleteObjectResponse deleteObject(String type, String id, boolean withRelations) {
         return writerClient.deleteObject(DeleteObjectRequest.newBuilder()
                 .setObjectType(type)
                 .setObjectId(id)
                 .setWithRelations(withRelations)
                 .build());
+    }
+
+    @Override
+    public SetRelationResponse setRelation(String objectType, String objectId, String relationName, String subjectType, String subjectId, String subjectRelation) {
+        Relation relation = Relation.newBuilder()
+                .setObjectType(objectType)
+                .setObjectId(objectId)
+                .setRelation(relationName)
+                .setSubjectType(subjectType)
+                .setSubjectId(subjectId)
+                .setSubjectRelation(subjectRelation)
+                .build();
+
+        return writerClient.setRelation(SetRelationRequest.newBuilder().setRelation(relation).build());
     }
 
     @Override
@@ -345,22 +400,6 @@ public class DirectoryClient implements DirectoryClientReader,
     }
 
 
-
-    private class ObjectIdentifierList implements Iterable<ObjectIdentifier> {
-        private List<ObjectIdentifier> objects;
-
-        public ObjectIdentifierList(List<ObjectIdentifier> objects) {
-            this.objects = objects;
-        }
-
-        @Override
-        public Iterator<ObjectIdentifier> iterator() {
-            return objects.iterator();
-        }
-
-    }
-
-
     public static void main(String[] args) throws SSLException, InterruptedException {
         // create a channel that has the connection details
         ManagedChannel channel = new ChannelBuilder()
@@ -369,8 +408,7 @@ public class DirectoryClient implements DirectoryClientReader,
                 .withInsecure(true)
                 .build();
 
-        DirectoryClientBuilder directoryClientBuilder = new DirectoryClientBuilder(channel);
-        DirectoryClient directoryClient = new DirectoryClient(directoryClientBuilder);
+        DirectoryClient directoryClient = new DirectoryClient(channel);
 
 //        GetObjectResponse getObjectResponse = directoryClient.getObject("user", "morty@the-citadel.com", false);
 //        GetManifestResponse getManifestResponse = directoryClient.getManifest();
