@@ -1,5 +1,5 @@
 import com.aserto.ChannelBuilder;
-import com.aserto.directory.DirectoryClient;
+import com.aserto.directory.v3.DirectoryClient;
 import com.aserto.directory.common.v3.Object;
 import com.aserto.directory.common.v3.ObjectIdentifier;
 import com.aserto.directory.common.v3.Relation;
@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import utils.IntegrationTestsExtenion;
 
 import javax.net.ssl.SSLException;
 
@@ -21,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Tag("IntegrationTest")
 @ExtendWith({IntegrationTestsExtenion.class})
-public class DirectoryClientTest {
+class DirectoryClientTest {
     private static DirectoryClient directoryClient;
 
     @BeforeAll

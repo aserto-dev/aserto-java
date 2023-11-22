@@ -1,4 +1,4 @@
-package com.aserto.directory;
+package com.aserto.directory.v3;
 
 import com.aserto.directory.model.v3.DeleteManifestResponse;
 import com.aserto.directory.model.v3.GetManifestResponse;

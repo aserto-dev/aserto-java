@@ -6,6 +6,7 @@ import io.grpc.StatusRuntimeException;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import utils.IntegrationTestsExtenion;
 
 import javax.net.ssl.SSLException;
 import java.io.IOException;

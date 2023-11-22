@@ -1,5 +1,7 @@
+package utils;
+
 import com.aserto.ChannelBuilder;
-import com.aserto.directory.DirectoryClient;
+import com.aserto.directory.v3.DirectoryClient;
 import io.grpc.ManagedChannel;
 
 import javax.net.ssl.SSLException;

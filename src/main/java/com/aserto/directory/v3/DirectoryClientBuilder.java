@@ -1,4 +1,4 @@
-package com.aserto.directory;
+package com.aserto.directory.v3;
 
 import com.aserto.directory.exporter.v3.ExporterGrpc;
 import com.aserto.directory.importer.v3.ImporterGrpc;
