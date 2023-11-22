@@ -1,4 +1,5 @@
 import com.aserto.ChannelBuilder;
+import com.aserto.directory.common.v3.ObjectDependency;
 import com.aserto.directory.v3.DirectoryClient;
 import com.aserto.directory.common.v3.Object;
 import com.aserto.directory.common.v3.ObjectIdentifier;
@@ -13,12 +14,13 @@ import utils.IntegrationTestsExtenion;
 
 import javax.net.ssl.SSLException;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("IntegrationTest")
 @ExtendWith({IntegrationTestsExtenion.class})
@@ -139,5 +141,100 @@ class DirectoryClientTest {
 
         // Assert
         assertEquals(10, getRelationsResponse.getResultsList().size());
+    }
+
+//    @Test
+//    @Tag("IntegrationTest")
+//    void testCheckRelationAdmin() {
+//        // Arrange & Act
+//        CheckRelationResponse checkRelationResponse = directoryClient.checkRelation(
+//                "group",
+//                "admin",
+//                "member",
+//                "user",
+//                "rick@the-citadel.com");
+//
+//        // Assert
+//        assertTrue(checkRelationResponse.getCheck());
+//    }
+
+    @Test
+    @Tag("IntegrationTest")
+    void testCheckRelationViewer() {
+        // Arrange & Act
+        CheckRelationResponse checkRelationResponse = directoryClient.checkRelation(
+                "group",
+                "viewer",
+                "member",
+                "user",
+                "rick@the-citadel.com");
+
+        // Assert
+        assertFalse(checkRelationResponse.getCheck());
+    }
+
+//    @Test
+//    @Tag("IntegrationTest")
+//    void testCheckAdmin() {
+//        // Arrange & Act
+//        CheckResponse checkResponse = directoryClient.check(
+//                "group",
+//                "admin",
+//                "member",
+//                "user",
+//                "rick@the-citadel.com");
+//
+//        // Assert
+//        assertTrue(checkResponse.getCheck());
+//    }
+
+    @Test
+    @Tag("IntegrationTest")
+    void testGetGraph() {
+        // Arrange
+        GetGraphRequest getGraphRequest = GetGraphRequest.newBuilder()
+                .setAnchorType("user")
+                .setAnchorId("rick@the-citadel.com")
+                .setObjectType("user")
+                .setObjectId("rick@the-citadel.com")
+                .build();
+
+        List<ObjectDependency> objectDependencyList = Arrays.asList(
+                ObjectDependency.newBuilder()
+                        .setObjectType("user")
+                        .setObjectId("rick@the-citadel.com")
+                        .setRelation("manager")
+                        .setSubjectType("user")
+                        .setSubjectId("beth@the-smiths.com")
+                        .build(),
+                ObjectDependency.newBuilder()
+                        .setObjectType("user")
+                        .setObjectId("beth@the-smiths.com")
+                        .setRelation("manager")
+                        .setSubjectType("user")
+                        .setSubjectId("jerry@the-smiths.com")
+                        .build(),
+                ObjectDependency.newBuilder()
+                        .setObjectType("user")
+                        .setObjectId("rick@the-citadel.com")
+                        .setRelation("manager")
+                        .setSubjectType("user")
+                        .setSubjectId("morty@the-citadel.com")
+                        .build(),
+                ObjectDependency.newBuilder()
+                        .setObjectType("user")
+                        .setObjectId("rick@the-citadel.com")
+                        .setRelation("manager")
+                        .setSubjectType("user")
+                        .setSubjectId("summer@the-smiths.com")
+                        .build());
+
+        // Act
+        GetGraphResponse getGraphResponse = directoryClient.getGraph(getGraphRequest);
+
+        // Assert
+        assertThat(getGraphResponse.getResultsList())
+                .usingRecursiveFieldByFieldElementComparatorOnFields("objectId_", "objectType_", "relation_", "subjectId_", "subjectType_")
+                .containsExactlyInAnyOrderElementsOf(objectDependencyList);
     }
 }
