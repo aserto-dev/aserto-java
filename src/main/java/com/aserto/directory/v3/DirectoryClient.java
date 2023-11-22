@@ -1,6 +1,5 @@
 package com.aserto.directory.v3;
 
-import com.aserto.ChannelBuilder;
 import com.aserto.utils.MessageChunker;
 import com.aserto.directory.common.v3.ObjectIdentifier;
 import com.aserto.directory.common.v3.PaginationRequest;
@@ -27,7 +26,6 @@ import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.net.ssl.SSLException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Instant;
@@ -40,7 +38,8 @@ import java.util.stream.Stream;
 public class DirectoryClient implements DirectoryClientReader,
         DirectoryClientWriter,
         DirectoryClientModel,
-        DirectoryClientImporter {
+        DirectoryClientImporter,
+        DirectoryClientExporter {
     static final int MAX_CHUNK_SIZE = 65536;
     Logger logger = LogManager.getLogger(DirectoryClient.class);
     private ReaderGrpc.ReaderBlockingStub readerClient;
@@ -59,8 +58,6 @@ public class DirectoryClient implements DirectoryClientReader,
         modelClient = dirClientBuilder.getModelClient();
         modelClientAsync = dirClientBuilder.getModelClientAsync();
     }
-
-
 
     @Override
     public GetObjectResponse getObject(String type, String id) {
@@ -286,7 +283,6 @@ public class DirectoryClient implements DirectoryClientReader,
                     outputStream.write(manifestResponse.getBody().getData().toByteArray());
                 } catch (IOException e) {
                     logger.error("Could not write to stream the fallowing message: {}", manifestResponse.getBody().getData().toByteArray());
-                    throw new RuntimeException(e);
                 }
             }
         });
@@ -382,116 +378,11 @@ public class DirectoryClient implements DirectoryClientReader,
         }
     }
 
+    @Override
     public Iterator<ExportResponse> exportData(Option options, Timestamp startFrom) {
         return exporterClient.export(ExportRequest.newBuilder()
                 .setOptions(options.getNumber())
                 .setStartFrom(startFrom)
                 .build());
     }
-
-
-    public static void main(String[] args) throws SSLException, InterruptedException {
-        // create a channel that has the connection details
-        ManagedChannel channel = new ChannelBuilder()
-                .withHost("localhost")
-                .withPort(9292)
-                .withInsecure(true)
-                .build();
-
-        DirectoryClient directoryClient = new DirectoryClient(channel);
-
-//        GetObjectResponse getObjectResponse = directoryClient.getObject("user", "morty@the-citadel.com", false);
-//        GetManifestResponse getManifestResponse = directoryClient.getManifest();
-//
-//        System.out.println(getObjectResponse.toString());
-//        System.out.println(getManifestResponse.getBody().getData().toStringUtf8());
-
-//        ---------------------------
-//        List<ObjectIdentifier> objects = List.of(
-//                ObjectIdentifier.newBuilder()
-//                        .setObjectType("user")
-//                        .setObjectId("rick@the-citadel.com")
-//                        .build(),
-//                ObjectIdentifier.newBuilder()
-//                        .setObjectType("user")
-//                        .setObjectId("morty@the-citadel.com")
-//                        .build());
-//
-//        GetObjectManyRequest getObjectManyRequest = directoryClient.getObjectManyRequest(objects);
-//        System.out.println(getObjectManyRequest);
-//    --------------------------------------
-
-//        GetGraphResponse getGraphResponse = directoryClient.getGraph("user", "rick@the-citadel.com", "user", "rick@the-citadel.com","", "", "", "");
-//        System.out.println(getGraphResponse);
-//    ---------------------------------
-
-
-//        String manifest =  "# yaml-language-server: $schema=https://www.topaz.sh/schema/manifest.json\n" +
-//                "---\n" +
-//                "### model ###\n" +
-//                "model:\n" +
-//                "  version: 3\n" +
-//                "\n" +
-//                "### object type definitions ###\n" +
-//                "types:\n" +
-//                "  ### display_name: User ###\n" +
-//                "  user:\n" +
-//                "    relations:\n" +
-//                "      ### display_name: user#manager ###\n" +
-//                "      manager: user\n" +
-//                "\n" +
-//                "  ### display_name: Identity ###\n" +
-//                "  identity:\n" +
-//                "    relations:\n" +
-//                "      ### display_name: identity#identifier ###\n" +
-//                "      identifier: user\n" +
-//                "\n" +
-//                "  ### display_name: Group ###\n" +
-//                "  group:\n" +
-//                "    relations:\n" +
-//                "      ### display_name: group#member ###\n" +
-//                "      member: user";
-//
-//        directoryClient.setManifest(manifest);
-//
-//
-//        System.out.println(directoryClient.getManifest().getBody().getData().toStringUtf8());
-
-//    --------------------------------------
-
-
-//        List<ImportElement> list = new ArrayList<>();
-//        Object user = Object.newBuilder()
-//                .setType("user")
-//                .setId("test@aserto.com").build();
-//        Relation managerRelation = Relation.newBuilder()
-//                .setObjectType("user")
-//                .setObjectId("test@aserto.com")
-//                .setRelation("manager")
-//                .setSubjectType("user")
-//                .setSubjectId("morty@the-citadel.com")
-//                .build();
-//
-//        list.add(new ImportElement(user));
-//        list.add(new ImportElement(managerRelation));
-//
-//        directoryClient.importData(list.stream());
-//
-//
-//        directoryClient.getObjects("user", 10, "");
-//        directoryClient.getObject("user", "test@aserto.com", true);
-
-//        ---------------------------------------
-//        directoryClient.setObject("user", "test", "test", Struct.newBuilder().build(), "");
-
-
-//        -----------------------------------
-        Iterator<ExportResponse> exportedData = directoryClient.exportData( Option.OPTION_DATA, Timestamp.newBuilder().setSeconds(0).setNanos(0).build());
-        exportedData.forEachRemaining(System.out::println);
-//        -----------------------------------
-
-    }
-
-
-
 }

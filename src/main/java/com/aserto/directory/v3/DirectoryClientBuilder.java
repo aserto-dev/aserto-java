@@ -88,24 +88,6 @@ public class DirectoryClientBuilder {
         return modelClientAsync;
     }
 
-    class Result<T> {
-        private T[] results;
-        private String nextPageToken;
-
-        public Result(T[] results, String nextPageToken) {
-            this.results = results;
-            this.nextPageToken = nextPageToken;
-        }
-
-        public T[] getResults() {
-            return results;
-        }
-
-        public String getNextPageToken() {
-            return nextPageToken;
-        }
-    }
-
     public void close() {
         if (channel != null) {
             channel.shutdown();
