@@ -103,6 +103,11 @@ public class DirectoryClient implements DirectoryClientReader,
     }
 
     @Override
+    public GetRelationResponse getRelation(String objectType, String objectId, String relationName, String subjectType, String subjectId) {
+        return getRelation(objectType, objectId, relationName, subjectType, subjectId, "", false);
+    }
+
+    @Override
     public GetRelationResponse getRelation(String objectType, String objectId, String relationName, String subjectType, String subjectId, String subjectRelation) {
         return getRelation(objectType, objectId, relationName, subjectType, subjectId, subjectRelation, false);
     }

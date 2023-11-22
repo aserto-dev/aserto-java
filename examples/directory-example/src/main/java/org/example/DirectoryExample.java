@@ -2,11 +2,14 @@ package org.example;
 
 import com.aserto.ChannelBuilder;
 import com.aserto.directory.DirectoryClient;
+import com.aserto.directory.common.v3.ObjectIdentifier;
+import com.aserto.directory.reader.v3.GetObjectManyResponse;
 import com.aserto.directory.reader.v3.GetObjectResponse;
 import com.aserto.directory.reader.v3.GetObjectsResponse;
 import io.grpc.ManagedChannel;
 
 import javax.net.ssl.SSLException;
+import java.util.List;
 
 public class DirectoryExample {
     public static void main(String[] args) throws SSLException {
@@ -22,6 +25,7 @@ public class DirectoryExample {
 
         getUserExample(directoryClient);
         getUsersExample(directoryClient);
+        getObjectManyRequest(directoryClient);
     }
 
     public static void getUserExample(DirectoryClient directoryClient) {
@@ -36,5 +40,19 @@ public class DirectoryExample {
         System.out.println(getObjectsResponse);
     }
 
+    public static void getObjectManyRequest(DirectoryClient directoryClient) {
+        System.out.println("------ Get object many example ------");
+        List<ObjectIdentifier> objects = List.of(
+        ObjectIdentifier.newBuilder()
+                .setObjectType("user")
+                .setObjectId("rick@the-citadel.com")
+                .build(),
+        ObjectIdentifier.newBuilder()
+                .setObjectType("user")
+                .setObjectId("morty@the-citadel.com")
+                .build());
 
+        GetObjectManyResponse getObjectManyRequest = directoryClient.getObjectManyRequest(objects);
+        System.out.println(getObjectManyRequest);
+    }
 }

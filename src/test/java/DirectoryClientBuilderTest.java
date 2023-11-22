@@ -3,8 +3,8 @@ import io.grpc.ManagedChannel;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.testing.GrpcCleanupRule;
-import org.junit.Rule;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -13,19 +13,23 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 public class DirectoryClientBuilderTest {
-    @Rule
-    public final GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
+    public static final GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
 
-    private ManagedChannel channel;
+    private static ManagedChannel channel;
 
-    @BeforeEach
-    public void setUp() throws IOException {
+    @BeforeAll
+    public static void setUp() throws IOException {
         // Generate a unique in-process server name.
         String serverName = InProcessServerBuilder.generateName();
 
         // Create a client channel and register for automatic graceful shutdown.
         channel = grpcCleanup.register(
                 InProcessChannelBuilder.forName(serverName).directExecutor().build());
+    }
+
+    @AfterAll
+    public static void tearDown() {
+        channel.shutdownNow();
     }
 
     @Test
