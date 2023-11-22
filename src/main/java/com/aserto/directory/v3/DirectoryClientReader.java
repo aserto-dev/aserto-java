@@ -29,6 +29,5 @@ public interface DirectoryClientReader {
     public CheckResponse check(String objectType, String objectId, String relationName, String subjectType, String subjectId);
     public CheckResponse check(String objectType, String objectId, String relationName,
                                String subjectType, String subjectId, boolean trace);
-    public GetGraphResponse getGraph(String anchorType, String anchorId, String objectType, String objectId,
-                                     String relation, String subjectType, String subjectId, String subjectRelation);
+    public GetGraphResponse getGraph(GetGraphRequest getGraphRequest);
 }

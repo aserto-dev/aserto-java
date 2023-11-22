@@ -177,19 +177,10 @@ public class DirectoryClient implements DirectoryClientReader,
                 .build());
     }
 
+
     @Override
-    public GetGraphResponse getGraph(String anchorType, String anchorId, String objectType, String objectId,
-                                     String relation, String subjectType, String subjectId, String subjectRelation) {
-        return readerClient.getGraph(GetGraphRequest.newBuilder()
-                .setAnchorType(anchorType)
-                .setAnchorId(anchorId)
-                .setObjectType(objectType)
-                .setObjectId(objectId)
-                .setRelation(relation)
-                .setSubjectType(subjectType)
-                .setSubjectId(subjectId)
-                .setSubjectRelation(subjectRelation)
-                .build());
+    public GetGraphResponse getGraph(GetGraphRequest getGraphRequest) {
+        return readerClient.getGraph(getGraphRequest);
     }
 
     @Override
