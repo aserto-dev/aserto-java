@@ -143,20 +143,20 @@ class DirectoryClientTest {
         assertEquals(10, getRelationsResponse.getResultsList().size());
     }
 
-//    @Test
-//    @Tag("IntegrationTest")
-//    void testCheckRelationAdmin() {
-//        // Arrange & Act
-//        CheckRelationResponse checkRelationResponse = directoryClient.checkRelation(
-//                "group",
-//                "admin",
-//                "member",
-//                "user",
-//                "rick@the-citadel.com");
-//
-//        // Assert
-//        assertTrue(checkRelationResponse.getCheck());
-//    }
+    @Test
+    @Tag("IntegrationTest")
+    void testCheckRelationAdmin() {
+        // Arrange & Act
+        CheckRelationResponse checkRelationResponse = directoryClient.checkRelation(
+                "group",
+                "admin",
+                "member",
+                "user",
+                "rick@the-citadel.com");
+
+        // Assert
+        assertTrue(checkRelationResponse.getCheck());
+    }
 
     @Test
     @Tag("IntegrationTest")
@@ -173,20 +173,20 @@ class DirectoryClientTest {
         assertFalse(checkRelationResponse.getCheck());
     }
 
-//    @Test
-//    @Tag("IntegrationTest")
-//    void testCheckAdmin() {
-//        // Arrange & Act
-//        CheckResponse checkResponse = directoryClient.check(
-//                "group",
-//                "admin",
-//                "member",
-//                "user",
-//                "rick@the-citadel.com");
-//
-//        // Assert
-//        assertTrue(checkResponse.getCheck());
-//    }
+    @Test
+    @Tag("IntegrationTest")
+    void testCheckAdmin() {
+        // Arrange & Act
+        CheckResponse checkResponse = directoryClient.check(
+                "group",
+                "admin",
+                "member",
+                "user",
+                "rick@the-citadel.com");
+
+        // Assert
+        assertTrue(checkResponse.getCheck());
+    }
 
     @Test
     @Tag("IntegrationTest")

@@ -38,6 +38,7 @@ public class Topaz {
         backupCfg();
         configure();
         start();
+        setManifest();
         loadData();
     }
 
@@ -46,7 +47,16 @@ public class Topaz {
         process.waitFor();
         restoreDb();
         restoreCfg();
+        // delete temp directory used to store downloaded files
         deleteDirectory(new File("temp"));
+    }
+    public void setManifest() throws IOException, URISyntaxException, InterruptedException {
+        downloadFile("https://raw.githubusercontent.com/aserto-dev/topaz/main/assets/citadel/manifest.yaml", "temp/manifest.yaml");
+
+        ProcessBuilder pb = new ProcessBuilder("topaz","manifest", "set", "-i", "temp/manifest.yaml");
+        pb.inheritIO();
+        Process process = pb.start();
+        process.waitFor();
     }
 
     private void loadData() throws IOException, URISyntaxException, InterruptedException {
@@ -57,15 +67,6 @@ public class Topaz {
         pb.inheritIO();
         Process process = pb.start();
         process.waitFor();
-    }
-
-    private void removeTempFile(String... files) {
-        for (String file: files) {
-            File tempFile = new File(file);
-            if(tempFile.exists()) {
-                tempFile.delete();
-            }
-        }
     }
 
     private void deleteDirectory(File directoryToBeDeleted) {
