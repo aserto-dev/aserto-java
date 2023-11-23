@@ -7,6 +7,7 @@ import com.aserto.directory.writer.v3.SetRelationResponse;
 import com.google.protobuf.Struct;
 
 public interface DirectoryClientWriter {
+    public SetObjectResponse setObject(String type, String id);
     public SetObjectResponse setObject(String type, String id, String displayName, Struct properties, String hash);
     public DeleteObjectResponse deleteObject(String type, String id);
     public DeleteObjectResponse deleteObject(String type, String id, boolean withRelations);

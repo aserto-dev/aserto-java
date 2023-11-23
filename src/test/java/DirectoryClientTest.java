@@ -5,6 +5,7 @@ import com.aserto.directory.common.v3.Object;
 import com.aserto.directory.common.v3.ObjectIdentifier;
 import com.aserto.directory.common.v3.Relation;
 import com.aserto.directory.reader.v3.*;
+import com.aserto.directory.writer.v3.SetObjectResponse;
 import io.grpc.ManagedChannel;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
@@ -236,5 +237,24 @@ class DirectoryClientTest {
         assertThat(getGraphResponse.getResultsList())
                 .usingRecursiveFieldByFieldElementComparatorOnFields("objectId_", "objectType_", "relation_", "subjectId_", "subjectType_")
                 .containsExactlyInAnyOrderElementsOf(objectDependencyList);
+    }
+
+    @Test
+    @Tag("IntegrationTest")
+    public void setObjectTest() {
+        // Arrange
+        Object object = Object.newBuilder()
+                .setType("test_type")
+                .setId("test_id")
+                .build();
+
+        // Act
+        SetObjectResponse setObjectResponse = directoryClient.setObject("test_type", "test_id");
+
+        // Assert
+        assertThat(setObjectResponse.getResult())
+                .usingRecursiveComparison()
+                .comparingOnlyFields("type_", "id_")
+                .isEqualTo(object);
     }
 }

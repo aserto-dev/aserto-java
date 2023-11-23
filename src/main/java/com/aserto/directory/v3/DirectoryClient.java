@@ -184,6 +184,11 @@ public class DirectoryClient implements DirectoryClientReader,
     }
 
     @Override
+    public SetObjectResponse setObject(String type, String id) {
+        return setObject(type, id, "", Struct.newBuilder().build(), "");
+    }
+
+    @Override
     public SetObjectResponse setObject(String type, String id, String displayName, Struct properties, String hash) {
         Instant time = Instant.now();
         Timestamp timestamp = Timestamp.newBuilder().setSeconds(time.getEpochSecond())
