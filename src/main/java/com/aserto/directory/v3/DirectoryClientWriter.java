@@ -12,9 +12,13 @@ public interface DirectoryClientWriter {
     public DeleteObjectResponse deleteObject(String type, String id);
     public DeleteObjectResponse deleteObject(String type, String id, boolean withRelations);
     public SetRelationResponse setRelation(String objectType, String objectId, String relationName,
+                                           String subjectType, String subjectId);
+    public SetRelationResponse setRelation(String objectType, String objectId, String relationName,
                                            String subjectType, String subjectId, String subjectRelation);
     public SetRelationResponse setRelation(String objectType, String objectId, String relationName,
                                            String subjectType, String subjectId, String subjectRelation, String hash);
+    public DeleteRelationResponse deleteRelation(String objectType, String objectId, String relationName,
+                                                 String subjectType, String subjectId);
     public DeleteRelationResponse deleteRelation(String objectType, String objectId, String relationName,
                                                  String subjectType, String subjectId, String subjectRelation);
 }

@@ -222,6 +222,19 @@ public class DirectoryClient implements DirectoryClientReader,
     }
 
     @Override
+    public SetRelationResponse setRelation(String objectType, String objectId, String relationName, String subjectType, String subjectId) {
+        Relation relation = Relation.newBuilder()
+                .setObjectType(objectType)
+                .setObjectId(objectId)
+                .setRelation(relationName)
+                .setSubjectType(subjectType)
+                .setSubjectId(subjectId)
+                .build();
+
+        return writerClient.setRelation(SetRelationRequest.newBuilder().setRelation(relation).build());
+    }
+
+    @Override
     public SetRelationResponse setRelation(String objectType, String objectId, String relationName, String subjectType, String subjectId, String subjectRelation) {
         Relation relation = Relation.newBuilder()
                 .setObjectType(objectType)
@@ -248,6 +261,17 @@ public class DirectoryClient implements DirectoryClientReader,
                 .build();
 
         return writerClient.setRelation(SetRelationRequest.newBuilder().setRelation(relation).build());
+    }
+
+    @Override
+    public DeleteRelationResponse deleteRelation(String objectType, String objectId, String relationName, String subjectType, String subjectId) {
+        return writerClient.deleteRelation(DeleteRelationRequest.newBuilder()
+                .setObjectType(objectType)
+                .setObjectId(objectId)
+                .setRelation(relationName)
+                .setSubjectType(subjectType)
+                .setSubjectId(subjectId)
+                .build());
     }
 
     @Override
@@ -372,6 +396,13 @@ public class DirectoryClient implements DirectoryClientReader,
         if (timedOut) {
             logger.error("Timed out waiting for server response.");
         }
+    }
+
+    @Override
+    public Iterator<ExportResponse> exportData(Option options) {
+        return exporterClient.export(ExportRequest.newBuilder()
+                .setOptions(options.getNumber())
+                .build());
     }
 
     @Override

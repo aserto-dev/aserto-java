@@ -5,16 +5,11 @@ import com.aserto.directory.v3.DirectoryClient;
 import io.grpc.ManagedChannel;
 
 import javax.net.ssl.SSLException;
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.concurrent.*;
-import java.net.URI;
 
 public class Topaz {
     private String HOME_DIR = System.getProperty("user.home");
@@ -38,8 +33,6 @@ public class Topaz {
         backupCfg();
         configure();
         start();
-        setManifest();
-        loadData();
     }
 
     public void stop() throws IOException, InterruptedException {
@@ -47,48 +40,6 @@ public class Topaz {
         process.waitFor();
         restoreDb();
         restoreCfg();
-        // delete temp directory used to store downloaded files
-        deleteDirectory(new File("temp"));
-    }
-    public void setManifest() throws IOException, URISyntaxException, InterruptedException {
-        downloadFile("https://raw.githubusercontent.com/aserto-dev/topaz/main/assets/citadel/manifest.yaml", "temp/manifest.yaml");
-
-        ProcessBuilder pb = new ProcessBuilder("topaz","manifest", "set", "-i", "temp/manifest.yaml");
-        pb.inheritIO();
-        Process process = pb.start();
-        process.waitFor();
-    }
-
-    private void loadData() throws IOException, URISyntaxException, InterruptedException {
-        downloadFile("https://raw.githubusercontent.com/aserto-dev/topaz/main/assets/citadel/citadel_objects.json", "temp/citadel_objects.json");
-        downloadFile("https://raw.githubusercontent.com/aserto-dev/topaz/main/assets/citadel/citadel_relations.json", "temp/citadel_relations.json");
-
-        ProcessBuilder pb = new ProcessBuilder("topaz","import", "-i", "-d", "temp/");
-        pb.inheritIO();
-        Process process = pb.start();
-        process.waitFor();
-    }
-
-    private void deleteDirectory(File directoryToBeDeleted) {
-        File[] allContents = directoryToBeDeleted.listFiles();
-        if (allContents != null) {
-            for (File file : allContents) {
-                deleteDirectory(file);
-            }
-        }
-        directoryToBeDeleted.delete();
-    }
-
-    private void downloadFile(String url, String filePath) throws IOException, URISyntaxException {
-        Files.createDirectories(Paths.get(filePath).getParent());
-
-        BufferedInputStream in = new BufferedInputStream(new URI(url).toURL().openStream());
-        FileOutputStream fileOutputStream = new FileOutputStream(filePath);
-        byte dataBuffer[] = new byte[1024];
-        int bytesRead;
-        while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
-            fileOutputStream.write(dataBuffer, 0, bytesRead);
-        }
     }
 
     private void start() throws IOException, InterruptedException {

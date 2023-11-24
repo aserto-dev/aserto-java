@@ -7,5 +7,6 @@ import com.google.protobuf.Timestamp;
 import java.util.Iterator;
 
 public interface DirectoryClientExporter {
+    public Iterator<ExportResponse> exportData(Option options);
     Iterator<ExportResponse> exportData(Option options, Timestamp startFrom);
 }
