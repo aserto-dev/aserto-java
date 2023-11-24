@@ -83,7 +83,7 @@ class DirectoryClientTest {
     @BeforeEach
     void beforeEach() throws InterruptedException {
         directoryClient.setManifest(originalManifest);
-        List<ImportElement> list = importDataList();
+        List<ImportElement> list = importCitadelDataList();
         directoryClient.importData(list.stream());
     }
 
@@ -98,11 +98,11 @@ class DirectoryClientTest {
         // Arrange
         Object managerObject = Object.newBuilder()
                 .setType("user")
-                .setId("manager@aserto.com")
+                .setId("rick@the-citadel.com")
                 .build();
 
         // Act
-        GetObjectResponse getObjectResponse = directoryClient.getObject("user", "manager@aserto.com");
+        GetObjectResponse getObjectResponse = directoryClient.getObject("user", "rick@the-citadel.com");
 
         // Assert
         assertThat(getObjectResponse.getResult())
@@ -118,18 +118,25 @@ class DirectoryClientTest {
         // Arrange
         Object managerObject = Object.newBuilder()
                 .setType("user")
-                .setId("manager@aserto.com")
+                .setId("rick@the-citadel.com")
                 .build();
-        Relation relation = Relation.newBuilder()
+        Relation managerRelation = Relation.newBuilder()
                 .setObjectType("user")
-                .setObjectId("user@aserto.com")
+                .setObjectId("morty@the-citadel.com")
                 .setRelation("manager")
                 .setSubjectType("user")
-                .setSubjectId("manager@aserto.com")
+                .setSubjectId("rick@the-citadel.com")
+                .build();
+        Relation adminRelation = Relation.newBuilder()
+                .setObjectType("group")
+                .setObjectId("admin")
+                .setRelation("member")
+                .setSubjectType("user")
+                .setSubjectId("rick@the-citadel.com")
                 .build();
 
         // Act
-        GetObjectResponse getObjectResponse = directoryClient.getObject("user", "user@aserto.com", true);
+        GetObjectResponse getObjectResponse = directoryClient.getObject("user", "rick@the-citadel.com", true);
 
         // Assert
         assertThat(getObjectResponse.getResult())
@@ -138,7 +145,7 @@ class DirectoryClientTest {
                 .isEqualTo(managerObject);
         assertThat(getObjectResponse.getRelationsList())
                 .usingRecursiveFieldByFieldElementComparatorOnFields("objectId_", "objectType_", "relation_", "subjectId_", "subjectType_")
-                .containsExactlyInAnyOrderElementsOf(List.of(relation));
+                .containsExactlyInAnyOrderElementsOf(List.of(managerRelation, adminRelation));
     }
 
     @Test
@@ -171,21 +178,20 @@ class DirectoryClientTest {
         List<ObjectIdentifier> objects = List.of(
             ObjectIdentifier.newBuilder()
                     .setObjectType("user")
-                    .setObjectId("manager@aserto.com")
+                    .setObjectId("rick@the-citadel.com")
                     .build(),
             ObjectIdentifier.newBuilder()
                     .setObjectType("user")
-                    .setObjectId("user@aserto.com")
+                    .setObjectId("morty@the-citadel.com")
                     .build());
+        Set<String> expectedUsers = objects.stream().map(ObjectIdentifier::getObjectId).collect(Collectors.toSet());
 
         // Act
         GetObjectManyResponse getObjectManyResponse = directoryClient.getObjectManyRequest(objects);
 
         // Assert
         Set<String> actualUsers = getObjectManyResponse.getResultsList().stream().map(Object::getId).collect(Collectors.toSet());
-        Set<String> expectedUsers = objects.stream().map(ObjectIdentifier::getObjectId).collect(Collectors.toSet());
-
-        assertEquals(actualUsers, expectedUsers);
+        assertEquals(expectedUsers, actualUsers);
     }
 
     @Test
@@ -194,17 +200,17 @@ class DirectoryClientTest {
         // Arrange
         Relation expectedRelation = Relation.newBuilder()
                 .setObjectType("user")
-                .setObjectId("user@aserto.com")
+                .setObjectId("morty@the-citadel.com")
                 .setRelation("manager")
                 .setSubjectType("user")
-                .setSubjectId("manager@aserto.com")
+                .setSubjectId("rick@the-citadel.com")
                 .build();
         GetRelationResponse getRelationResponse = directoryClient.getRelation(
                 "user",
-                "user@aserto.com",
+                "morty@the-citadel.com",
                 "manager",
                 "user",
-                "manager@aserto.com");
+                "rick@the-citadel.com");
 
         // Act
         Relation relation = getRelationResponse.getResult();
@@ -222,25 +228,25 @@ class DirectoryClientTest {
         // Arrange
         Relation expectedManagerRelation = Relation.newBuilder()
                 .setObjectType("user")
-                .setObjectId("user@aserto.com")
+                .setObjectId("morty@the-citadel.com")
                 .setRelation("manager")
                 .setSubjectType("user")
-                .setSubjectId("manager@aserto.com")
+                .setSubjectId("rick@the-citadel.com")
                 .build();
         Relation expectedFriendRelation = Relation.newBuilder()
                 .setObjectType("user")
-                .setObjectId("user@aserto.com")
+                .setObjectId("morty@the-citadel.com")
                 .setRelation("friend")
                 .setSubjectType("user")
-                .setSubjectId("manager@aserto.com")
+                .setSubjectId("rick@the-citadel.com")
                 .build();
 
         directoryClient.setRelation(
                 "user",
-                "user@aserto.com",
+                "morty@the-citadel.com",
                 "friend",
                 "user",
-                "manager@aserto.com");
+                "rick@the-citadel.com");
 
         GetRelationsRequest getRelationsRequest = GetRelationsRequest.newBuilder().setObjectType("user").build();
 
@@ -260,10 +266,10 @@ class DirectoryClientTest {
         // Arrange & Act
         CheckRelationResponse checkRelationResponse = directoryClient.checkRelation(
                 "user",
-                "user@aserto.com",
+                "morty@the-citadel.com",
                 "manager",
                 "user",
-                "manager@aserto.com");
+                "rick@the-citadel.com");
 
         // Assert
         assertTrue(checkRelationResponse.getCheck());
@@ -275,10 +281,10 @@ class DirectoryClientTest {
         // Arrange & Act
         CheckRelationResponse checkRelationResponse = directoryClient.checkRelation(
                 "user",
-                "user@aserto.com",
+                "morty@the-citadel.com",
                 "friend",
                 "user",
-                "manager@aserto.com");
+                "rick@the-citadel.com");
 
         // Assert
         assertFalse(checkRelationResponse.getCheck());
@@ -290,10 +296,10 @@ class DirectoryClientTest {
         // Arrange & Act
         CheckResponse checkResponse = directoryClient.check(
                 "user",
-                "user@aserto.com",
+                "morty@the-citadel.com",
                 "manager",
                 "user",
-                "manager@aserto.com");
+                "rick@the-citadel.com");
 
         // Assert
         assertTrue(checkResponse.getCheck());
@@ -305,18 +311,18 @@ class DirectoryClientTest {
         // Arrange
         GetGraphRequest getGraphRequest = GetGraphRequest.newBuilder()
                 .setAnchorType("user")
-                .setAnchorId("user@aserto.com")
+                .setAnchorId("morty@the-citadel.com")
                 .setObjectType("user")
-                .setObjectId("user@aserto.com")
+                .setObjectId("morty@the-citadel.com")
                 .build();
 
                 List<ObjectDependency> objectDependencyList = Arrays.asList(
                     ObjectDependency.newBuilder()
                             .setObjectType("user")
-                            .setObjectId("user@aserto.com")
+                            .setObjectId("morty@the-citadel.com")
                             .setRelation("manager")
                             .setSubjectType("user")
-                            .setSubjectId("manager@aserto.com")
+                            .setSubjectId("rick@the-citadel.com")
                             .build()
                 );
 
@@ -368,19 +374,19 @@ class DirectoryClientTest {
         // Arrange
         Relation relation = Relation.newBuilder()
                 .setObjectType("user")
-                .setObjectId("user@aserto.com")
+                .setObjectId("morty@the-citadel.com")
                 .setRelation("friend")
                 .setSubjectType("user")
-                .setSubjectId("manager@aserto.com")
+                .setSubjectId("rick@the-citadel.com")
                 .build();
 
         // Act
         SetRelationResponse setRelationResponse = directoryClient.setRelation(
                 "user",
-                "user@aserto.com",
+                "morty@the-citadel.com",
                 "friend",
                 "user",
-                "manager@aserto.com");
+                "rick@the-citadel.com");
 
         // Assert
         assertThat(setRelationResponse.getResult())
@@ -395,19 +401,19 @@ class DirectoryClientTest {
         // Arrange & Act
         DeleteRelationResponse deleteRelationResponse = directoryClient.deleteRelation(
                 "user",
-                "user@aserto.com",
+                "morty@the-citadel.com",
                 "manager",
                 "user",
-                "manager@aserto.com");
+                "rick@the-citadel.com");
 
         // Assert
         StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> {
             directoryClient.getRelation(
                     "user",
-                    "user@aserto.com",
+                    "morty@the-citadel.com",
                     "manager",
                     "user",
-                    "manager@aserto.com");
+                    "rick@the-citadel.com");
         });
 
         assertEquals("NOT_FOUND: E20051 key not found", exception.getMessage());
@@ -449,7 +455,7 @@ class DirectoryClientTest {
     @Tag("IntegrationTest")
     void importDataTest() throws InterruptedException {
         // Arrange
-        List<ImportElement> list = importDataList();
+        List<ImportElement> list = importCitadelDataList();
         List<Object> users = list.stream()
                 .map(ImportElement::getObject)
                 .filter(object -> object != null && object.getType().equals("user"))
@@ -468,7 +474,7 @@ class DirectoryClientTest {
 
     @Test
     @Tag("IntegrationTest")
-    void exportDataTest() throws InterruptedException {
+    void exportDataTest() {
         // Arrange & Act
         Iterator<ExportResponse> exportedData = directoryClient.exportData(Option.OPTION_DATA);
 
@@ -479,27 +485,53 @@ class DirectoryClientTest {
             elementCount++;
         }
 
-        assertEquals(3, elementCount);
+        assertEquals(7, elementCount);
     }
 
-    private List<ImportElement> importDataList() {
+    private List<ImportElement> importCitadelDataList() {
         List<ImportElement> importElements = new ArrayList<>();
-        Object managerUser = Object.newBuilder()
+        Object rick = Object.newBuilder()
                 .setType("user")
-                .setId("manager@aserto.com").build();
-        Object user = Object.newBuilder()
+                .setId("rick@the-citadel.com").build();
+        Object morty = Object.newBuilder()
                 .setType("user")
-                .setId("user@aserto.com").build();
+                .setId("morty@the-citadel.com").build();
+        Object adminGroup = Object.newBuilder()
+                .setType("group")
+                .setId("admin")
+                .build();
+        Object editorGroup = Object.newBuilder()
+                .setType("group")
+                .setId("editor")
+                .build();
+        Relation rickAdminRelation = Relation.newBuilder()
+                .setObjectType("group")
+                .setObjectId("admin")
+                .setRelation("member")
+                .setSubjectType("user")
+                .setSubjectId("rick@the-citadel.com")
+                .build();
+        Relation mortyEditorRelation = Relation.newBuilder()
+                .setObjectType("group")
+                .setObjectId("editor")
+                .setRelation("member")
+                .setSubjectType("user")
+                .setSubjectId("morty@the-citadel.com")
+                .build();
         Relation managerRelation = Relation.newBuilder()
                 .setObjectType("user")
-                .setObjectId("user@aserto.com")
+                .setObjectId("morty@the-citadel.com")
                 .setRelation("manager")
                 .setSubjectType("user")
-                .setSubjectId("manager@aserto.com")
+                .setSubjectId("rick@the-citadel.com")
                 .build();
 
-        importElements.add(new ImportElement(managerUser));
-        importElements.add(new ImportElement(user));
+        importElements.add(new ImportElement(rick));
+        importElements.add(new ImportElement(morty));
+        importElements.add(new ImportElement(adminGroup));
+        importElements.add(new ImportElement(editorGroup));
+        importElements.add(new ImportElement(rickAdminRelation));
+        importElements.add(new ImportElement(mortyEditorRelation));
         importElements.add(new ImportElement(managerRelation));
 
         return importElements;
