@@ -93,7 +93,6 @@ class DirectoryClientTest {
     }
 
     @Test
-    @Tag("IntegrationTest")
     void testGetUserWithNoRelations() {
         // Arrange
         Object managerObject = Object.newBuilder()
@@ -113,7 +112,6 @@ class DirectoryClientTest {
     }
 
     @Test
-    @Tag("IntegrationTest")
     void testGetUserWithRelations() {
         // Arrange
         Object managerObject = Object.newBuilder()
@@ -149,7 +147,6 @@ class DirectoryClientTest {
     }
 
     @Test
-    @Tag("IntegrationTest")
     void testGetUsers() {
         // Arrange & Act
         GetObjectsResponse getObjectsResponse = directoryClient.getObjects("user");
@@ -159,7 +156,6 @@ class DirectoryClientTest {
     }
 
     @Test
-    @Tag("IntegrationTest")
     void testGetUsersWithLimit() {
         // Arrange & Act
         GetObjectsResponse getObjectsResponse = directoryClient.getObjects("user", 1, "");
@@ -172,7 +168,6 @@ class DirectoryClientTest {
     }
 
     @Test
-    @Tag("IntegrationTest")
     void testGetUserManyRequest() {
         // Arrange
         List<ObjectIdentifier> objects = List.of(
@@ -195,7 +190,6 @@ class DirectoryClientTest {
     }
 
     @Test
-    @Tag("IntegrationTest")
     void testGetRelation() {
         // Arrange
         Relation expectedRelation = Relation.newBuilder()
@@ -223,7 +217,6 @@ class DirectoryClientTest {
     }
 
     @Test
-    @Tag("IntegrationTest")
     void testGetRelations() {
         // Arrange
         Relation expectedManagerRelation = Relation.newBuilder()
@@ -261,7 +254,6 @@ class DirectoryClientTest {
     }
 
     @Test
-    @Tag("IntegrationTest")
     void testCheckRelationManager() {
         // Arrange & Act
         CheckRelationResponse checkRelationResponse = directoryClient.checkRelation(
@@ -276,7 +268,6 @@ class DirectoryClientTest {
     }
 
     @Test
-    @Tag("IntegrationTest")
     void testCheckRelationFriend() {
         // Arrange & Act
         CheckRelationResponse checkRelationResponse = directoryClient.checkRelation(
@@ -291,7 +282,6 @@ class DirectoryClientTest {
     }
 
     @Test
-    @Tag("IntegrationTest")
     void testCheckManager() {
         // Arrange & Act
         CheckResponse checkResponse = directoryClient.check(
@@ -306,7 +296,6 @@ class DirectoryClientTest {
     }
 
     @Test
-    @Tag("IntegrationTest")
     void testGetGraph() {
         // Arrange
         GetGraphRequest getGraphRequest = GetGraphRequest.newBuilder()
@@ -336,7 +325,6 @@ class DirectoryClientTest {
     }
 
     @Test
-    @Tag("IntegrationTest")
     void setObjectTest() {
         // Arrange
         Object object = Object.newBuilder()
@@ -355,7 +343,6 @@ class DirectoryClientTest {
     }
 
     @Test
-    @Tag("IntegrationTest")
     void deleteObjectTest() {
         // Arrange
         directoryClient.setObject("test_type", "test_id");
@@ -369,7 +356,6 @@ class DirectoryClientTest {
     }
 
     @Test
-    @Tag("IntegrationTest")
     void setRelationTest() {
         // Arrange
         Relation relation = Relation.newBuilder()
@@ -396,7 +382,6 @@ class DirectoryClientTest {
     }
 
     @Test
-    @Tag("IntegrationTest")
     void deleteRelationTest() {
         // Arrange & Act
         DeleteRelationResponse deleteRelationResponse = directoryClient.deleteRelation(
@@ -420,7 +405,6 @@ class DirectoryClientTest {
     }
 
     @Test
-    @Tag("IntegrationTest")
     void testGetManifest() {
         // Arrange & Act
         GetManifestResponse getManifestResponse = directoryClient.getManifest();
@@ -430,7 +414,6 @@ class DirectoryClientTest {
     }
 
     @Test
-    @Tag("IntegrationTest")
     void testSetManifest() throws InterruptedException {
         // Arrange & Act
         directoryClient.setManifest(modifiedManifest);
@@ -441,7 +424,6 @@ class DirectoryClientTest {
     }
 
     @Test
-    @Tag("IntegrationTest")
     void testDeleteManifest() {
         // Arrange & Act
         directoryClient.deleteManifest();
@@ -452,7 +434,6 @@ class DirectoryClientTest {
     }
 
     @Test
-    @Tag("IntegrationTest")
     void importDataTest() throws InterruptedException {
         // Arrange
         List<ImportElement> list = importCitadelDataList();
@@ -473,7 +454,6 @@ class DirectoryClientTest {
     }
 
     @Test
-    @Tag("IntegrationTest")
     void exportDataTest() {
         // Arrange & Act
         Iterator<ExportResponse> exportedData = directoryClient.exportData(Option.OPTION_DATA);

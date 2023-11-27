@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @ExtendWith({IntegrationTestsExtenion.class})
 class AuthzClientIntegrationTest {
     @Test
-    @Tag("IntegrationTest")
     void testBuildAuthzClient() throws IOException {
         // Arrange
         ManagedChannel channel = new ChannelBuilder()
@@ -40,7 +39,6 @@ class AuthzClientIntegrationTest {
     }
 
     @Test
-    @Tag("IntegrationTest")
     void testInsecureConnectionToInsecureClient() throws SSLException {
         // Arrange
         ManagedChannel channel = new ChannelBuilder()
@@ -60,7 +58,6 @@ class AuthzClientIntegrationTest {
     }
 
     @Test
-    @Tag("IntegrationTest")
     void testFailWhenSecureConnectionToInsecureClient() throws SSLException {
         // Arrange
         ManagedChannel channel = new ChannelBuilder()

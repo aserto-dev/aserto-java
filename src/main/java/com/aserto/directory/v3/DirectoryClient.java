@@ -108,6 +108,7 @@ public class DirectoryClient implements DirectoryClientReader,
     public GetRelationResponse getRelation(String objectType, String objectId, String relationName, String subjectType, String subjectId, String subjectRelation) {
         return getRelation(objectType, objectId, relationName, subjectType, subjectId, subjectRelation, false);
     }
+
     @Override
     public GetRelationResponse getRelation(String objectType, String objectId, String relationName, String subjectType, String subjectId, String subjectRelation, boolean withObjects) {
         return readerClient.getRelation(GetRelationRequest.newBuilder()
@@ -176,7 +177,6 @@ public class DirectoryClient implements DirectoryClientReader,
                 .setTrace(trace)
                 .build());
     }
-
 
     @Override
     public GetGraphResponse getGraph(GetGraphRequest getGraphRequest) {
