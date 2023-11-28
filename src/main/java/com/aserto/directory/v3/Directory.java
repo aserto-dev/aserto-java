@@ -4,7 +4,7 @@ import com.aserto.directory.common.v3.Object;
 import com.aserto.directory.common.v3.ObjectIdentifier;
 import com.aserto.directory.common.v3.Relation;
 
-public class Factory {
+public class Directory {
 
     public static Object buildObject(String type, String id) {
         return Object.newBuilder().setType(type).setId(id).build();

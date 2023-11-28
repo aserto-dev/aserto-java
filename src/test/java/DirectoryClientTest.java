@@ -3,12 +3,12 @@ import com.aserto.directory.common.v3.ObjectDependency;
 import com.aserto.directory.exporter.v3.ExportResponse;
 import com.aserto.directory.exporter.v3.Option;
 import com.aserto.directory.model.v3.GetManifestResponse;
+import com.aserto.directory.v3.Directory;
 import com.aserto.directory.v3.DirectoryClient;
 import com.aserto.directory.common.v3.Object;
 import com.aserto.directory.common.v3.ObjectIdentifier;
 import com.aserto.directory.common.v3.Relation;
 import com.aserto.directory.reader.v3.*;
-import com.aserto.directory.v3.Factory;
 import com.aserto.directory.writer.v3.DeleteRelationResponse;
 import com.aserto.directory.writer.v3.SetObjectResponse;
 import com.aserto.directory.writer.v3.SetRelationResponse;
@@ -96,7 +96,7 @@ class DirectoryClientTest {
     @Test
     void testGetUserWithNoRelations() {
         // Arrange
-        Object managerObject = Factory.buildObject("user", "rick@the-citadel.com");
+        Object managerObject = Directory.buildObject("user", "rick@the-citadel.com");
 
         // Act
         GetObjectResponse getObjectResponse = directoryClient.getObject("user", "rick@the-citadel.com");
@@ -112,9 +112,9 @@ class DirectoryClientTest {
     @Test
     void testGetUserWithRelations() {
         // Arrange
-        Object managerObject = Factory.buildObject("user", "rick@the-citadel.com");
-        Relation managerRelation = Factory.buildRelation("user", "morty@the-citadel.com", "manager", "user", "rick@the-citadel.com");
-        Relation adminRelation = Factory.buildRelation("group", "admin", "member", "user", "rick@the-citadel.com");
+        Object managerObject = Directory.buildObject("user", "rick@the-citadel.com");
+        Relation managerRelation = Directory.buildRelation("user", "morty@the-citadel.com", "manager", "user", "rick@the-citadel.com");
+        Relation adminRelation = Directory.buildRelation("group", "admin", "member", "user", "rick@the-citadel.com");
 
         // Act
         GetObjectResponse getObjectResponse = directoryClient.getObject("user", "rick@the-citadel.com", true);
@@ -154,8 +154,8 @@ class DirectoryClientTest {
     void testGetUserManyRequest() {
         // Arrange
         List<ObjectIdentifier> objects = List.of(
-            Factory.buildObjectIdentifier("user", "rick@the-citadel.com"),
-            Factory.buildObjectIdentifier("user", "morty@the-citadel.com"));
+            Directory.buildObjectIdentifier("user", "rick@the-citadel.com"),
+            Directory.buildObjectIdentifier("user", "morty@the-citadel.com"));
         Set<String> expectedUsers = objects.stream().map(ObjectIdentifier::getObjectId).collect(Collectors.toSet());
 
         // Act
@@ -169,7 +169,7 @@ class DirectoryClientTest {
     @Test
     void testGetRelation() {
         // Arrange
-        Relation expectedRelation = Factory.buildRelation("user", "morty@the-citadel.com", "manager", "user", "rick@the-citadel.com");
+        Relation expectedRelation = Directory.buildRelation("user", "morty@the-citadel.com", "manager", "user", "rick@the-citadel.com");
 
         // Act
         GetRelationResponse getRelationResponse = directoryClient.getRelation(
@@ -190,8 +190,8 @@ class DirectoryClientTest {
     @Test
     void testGetRelations() {
         // Arrange
-        Relation expectedManagerRelation = Factory.buildRelation("user", "morty@the-citadel.com", "manager", "user", "rick@the-citadel.com");
-        Relation expectedFriendRelation = Factory.buildRelation("user", "morty@the-citadel.com", "friend", "user", "rick@the-citadel.com");
+        Relation expectedManagerRelation = Directory.buildRelation("user", "morty@the-citadel.com", "manager", "user", "rick@the-citadel.com");
+        Relation expectedFriendRelation = Directory.buildRelation("user", "morty@the-citadel.com", "friend", "user", "rick@the-citadel.com");
 
         directoryClient.setRelation(
                 "user",
@@ -286,7 +286,7 @@ class DirectoryClientTest {
     @Test
     void setObjectTest() {
         // Arrange
-        Object object = Factory.buildObject("test_type", "test_id");
+        Object object = Directory.buildObject("test_type", "test_id");
 
         // Act
         SetObjectResponse setObjectResponse = directoryClient.setObject("test_type", "test_id");
@@ -314,7 +314,7 @@ class DirectoryClientTest {
     @Test
     void setRelationTest() {
         // Arrange
-        Relation relation = Factory.buildRelation("user", "morty@the-citadel.com", "friend", "user", "rick@the-citadel.com");
+        Relation relation = Directory.buildRelation("user", "morty@the-citadel.com", "friend", "user", "rick@the-citadel.com");
 
         // Act
         SetRelationResponse setRelationResponse = directoryClient.setRelation(
@@ -420,13 +420,13 @@ class DirectoryClientTest {
 
     private List<ImportElement> importCitadelDataList() {
         List<ImportElement> importElements = new ArrayList<>();
-        Object rick = Factory.buildObject("user", "rick@the-citadel.com");
-        Object morty = Factory.buildObject("user", "morty@the-citadel.com");
-        Object adminGroup = Factory.buildObject("group", "admin");
-        Object editorGroup = Factory.buildObject("group", "editor");
-        Relation rickAdminRelation = Factory.buildRelation("group", "admin", "member", "user", "rick@the-citadel.com");
-        Relation mortyEditorRelation = Factory.buildRelation("group", "editor", "member", "user", "morty@the-citadel.com");
-        Relation managerRelation = Factory.buildRelation("user", "morty@the-citadel.com", "manager", "user", "rick@the-citadel.com");
+        Object rick = Directory.buildObject("user", "rick@the-citadel.com");
+        Object morty = Directory.buildObject("user", "morty@the-citadel.com");
+        Object adminGroup = Directory.buildObject("group", "admin");
+        Object editorGroup = Directory.buildObject("group", "editor");
+        Relation rickAdminRelation = Directory.buildRelation("group", "admin", "member", "user", "rick@the-citadel.com");
+        Relation mortyEditorRelation = Directory.buildRelation("group", "editor", "member", "user", "morty@the-citadel.com");
+        Relation managerRelation = Directory.buildRelation("user", "morty@the-citadel.com", "manager", "user", "rick@the-citadel.com");
 
         importElements.add(new ImportElement(rick));
         importElements.add(new ImportElement(morty));
