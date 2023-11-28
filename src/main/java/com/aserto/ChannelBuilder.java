@@ -90,7 +90,11 @@ public class ChannelBuilder {
                 .intercept(MetadataUtils.newAttachHeadersInterceptor(metadata));
 
         boolean insecure = cfg.getInsecure();
-        boolean caSpecified  = !cfg.getCaCertPath().isEmpty();
+
+        boolean caSpecified = true;
+        if (cfg.getCaCertPath() == null || cfg.getCaCertPath().isEmpty()) {
+            caSpecified = false;
+        }
 
         if (insecure) {
             SslContext context = GrpcSslContexts.forClient()

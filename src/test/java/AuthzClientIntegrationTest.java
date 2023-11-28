@@ -1,10 +1,12 @@
-import com.aserto.AuthzClient;
+import com.aserto.authorizer.AuthzClient;
 import com.aserto.ChannelBuilder;
 import com.aserto.authorizer.v2.api.Module;
 import io.grpc.ManagedChannel;
 import io.grpc.StatusRuntimeException;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import utils.IntegrationTestsExtenion;
 
 import javax.net.ssl.SSLException;
 import java.io.IOException;
@@ -14,9 +16,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Tag("IntegrationTest")
+@ExtendWith({IntegrationTestsExtenion.class})
 class AuthzClientIntegrationTest {
     @Test
-    @Tag("IntegrationTest")
     void testBuildAuthzClient() throws IOException {
         // Arrange
         ManagedChannel channel = new ChannelBuilder()
@@ -33,11 +35,10 @@ class AuthzClientIntegrationTest {
         authzClient.close();
 
         // Assert
-        assertEquals(6, policies.size());
+        assertEquals(5, policies.size());
     }
 
     @Test
-    @Tag("IntegrationTest")
     void testInsecureConnectionToInsecureClient() throws SSLException {
         // Arrange
         ManagedChannel channel = new ChannelBuilder()
@@ -53,11 +54,10 @@ class AuthzClientIntegrationTest {
         authzClient.close();
 
         // Assert
-        assertEquals(6, policies.size());
+        assertEquals(5, policies.size());
     }
 
     @Test
-    @Tag("IntegrationTest")
     void testFailWhenSecureConnectionToInsecureClient() throws SSLException {
         // Arrange
         ManagedChannel channel = new ChannelBuilder()

@@ -1,5 +1,5 @@
 import com.aserto.AuthorizerClient;
-import com.aserto.AuthzClient;
+import com.aserto.authorizer.AuthzClient;
 import com.aserto.authorizer.v2.*;
 import com.aserto.authorizer.v2.api.IdentityType;
 import com.aserto.authorizer.v2.api.Module;
@@ -12,10 +12,7 @@ import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.GrpcCleanupRule;
-import org.junit.Rule;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import javax.net.ssl.SSLException;
 import java.io.IOException;
@@ -27,12 +24,10 @@ import static org.mockito.Mockito.mock;
 
 
 class AuthzClientTest {
-
-    @Rule
-    public final GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
+    public static final GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
 
     // Will be used to mock the grpc server
-    private final AuthorizerGrpc.AuthorizerImplBase serviceImpl =
+    private static final AuthorizerGrpc.AuthorizerImplBase serviceImpl =
             mock(AuthorizerGrpc.AuthorizerImplBase.class, delegatesTo(
                     new AuthorizerGrpc.AuthorizerImplBase() {
                         // Implement necessary behaviour for tests by overriding the grpc called methods
@@ -114,10 +109,10 @@ class AuthzClientTest {
                         }
                     }));
 
-    private AuthorizerClient client;
+    private static AuthorizerClient client;
 
-    @BeforeEach
-    public void setUp() throws IOException {
+    @BeforeAll
+    public static void setUp() throws IOException {
         // Generate a unique in-process server name.
         String serverName = InProcessServerBuilder.generateName();
 
@@ -133,8 +128,8 @@ class AuthzClientTest {
         client = new AuthzClient(channel);
     }
 
-    @AfterEach
-    public void tearDown() throws Exception {
+    @AfterAll
+    public static void tearDown() throws Exception {
         client.close();
     }
 
