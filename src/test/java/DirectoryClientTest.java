@@ -113,7 +113,7 @@ class DirectoryClientTest {
     void testGetUserWithRelations() {
         // Arrange
         Object managerObject = Directory.buildObject("user", "rick@the-citadel.com");
-        Relation managerRelation = Directory.buildRelation("user", "morty@the-citadel.com", "manager", "user", "rick@the-citadel.com");
+        Relation managerRelation = Directory.buildRelation("user", "rick@the-citadel.com", "manager", "user", "morty@the-citadel.com");
         Relation adminRelation = Directory.buildRelation("group", "admin", "member", "user", "rick@the-citadel.com");
 
         // Act
@@ -169,15 +169,15 @@ class DirectoryClientTest {
     @Test
     void testGetRelation() {
         // Arrange
-        Relation expectedRelation = Directory.buildRelation("user", "morty@the-citadel.com", "manager", "user", "rick@the-citadel.com");
+        Relation expectedRelation = Directory.buildRelation("user", "rick@the-citadel.com", "manager", "user", "morty@the-citadel.com");
 
         // Act
         GetRelationResponse getRelationResponse = directoryClient.getRelation(
                 "user",
-                "morty@the-citadel.com",
+                "rick@the-citadel.com",
                 "manager",
                 "user",
-                "rick@the-citadel.com");
+                "morty@the-citadel.com");
 
         // Assert
         Relation relation = getRelationResponse.getResult();
@@ -190,15 +190,15 @@ class DirectoryClientTest {
     @Test
     void testGetRelations() {
         // Arrange
-        Relation expectedManagerRelation = Directory.buildRelation("user", "morty@the-citadel.com", "manager", "user", "rick@the-citadel.com");
-        Relation expectedFriendRelation = Directory.buildRelation("user", "morty@the-citadel.com", "friend", "user", "rick@the-citadel.com");
+        Relation expectedManagerRelation = Directory.buildRelation("user", "rick@the-citadel.com", "manager", "user", "morty@the-citadel.com");
+        Relation expectedFriendRelation = Directory.buildRelation("user", "rick@the-citadel.com", "friend", "user", "morty@the-citadel.com");
 
         directoryClient.setRelation(
                 "user",
-                "morty@the-citadel.com",
+                "rick@the-citadel.com",
                 "friend",
                 "user",
-                "rick@the-citadel.com");
+                "morty@the-citadel.com");
 
         GetRelationsRequest getRelationsRequest = GetRelationsRequest.newBuilder().setObjectType("user").build();
 
@@ -217,10 +217,10 @@ class DirectoryClientTest {
         // Arrange & Act
         CheckRelationResponse checkRelationResponse = directoryClient.checkRelation(
                 "user",
-                "morty@the-citadel.com",
+                "rick@the-citadel.com",
                 "manager",
                 "user",
-                "rick@the-citadel.com");
+                "morty@the-citadel.com");
 
         // Assert
         assertTrue(checkRelationResponse.getCheck());
@@ -231,10 +231,10 @@ class DirectoryClientTest {
         // Arrange & Act
         CheckRelationResponse checkRelationResponse = directoryClient.checkRelation(
                 "user",
-                "morty@the-citadel.com",
+                "rick@the-citadel.com",
                 "friend",
                 "user",
-                "rick@the-citadel.com");
+                "morty@the-citadel.com");
 
         // Assert
         assertFalse(checkRelationResponse.getCheck());
@@ -245,10 +245,10 @@ class DirectoryClientTest {
         // Arrange & Act
         CheckResponse checkResponse = directoryClient.check(
                 "user",
-                "morty@the-citadel.com",
+                "rick@the-citadel.com",
                 "manager",
                 "user",
-                "rick@the-citadel.com");
+                "morty@the-citadel.com");
 
         // Assert
         assertTrue(checkResponse.getCheck());
@@ -259,18 +259,18 @@ class DirectoryClientTest {
         // Arrange
         GetGraphRequest getGraphRequest = GetGraphRequest.newBuilder()
                 .setAnchorType("user")
-                .setAnchorId("morty@the-citadel.com")
+                .setAnchorId("rick@the-citadel.com")
                 .setObjectType("user")
-                .setObjectId("morty@the-citadel.com")
+                .setObjectId("rick@the-citadel.com")
                 .build();
 
                 List<ObjectDependency> objectDependencyList = Arrays.asList(
                     ObjectDependency.newBuilder()
                             .setObjectType("user")
-                            .setObjectId("morty@the-citadel.com")
+                            .setObjectId("rick@the-citadel.com")
                             .setRelation("manager")
                             .setSubjectType("user")
-                            .setSubjectId("rick@the-citadel.com")
+                            .setSubjectId("morty@the-citadel.com")
                             .build()
                 );
 
@@ -426,7 +426,7 @@ class DirectoryClientTest {
         Object editorGroup = Directory.buildObject("group", "editor");
         Relation rickAdminRelation = Directory.buildRelation("group", "admin", "member", "user", "rick@the-citadel.com");
         Relation mortyEditorRelation = Directory.buildRelation("group", "editor", "member", "user", "morty@the-citadel.com");
-        Relation managerRelation = Directory.buildRelation("user", "morty@the-citadel.com", "manager", "user", "rick@the-citadel.com");
+        Relation managerRelation = Directory.buildRelation("user", "rick@the-citadel.com", "manager", "user", "morty@the-citadel.com");
 
         importElements.add(new ImportElement(rick));
         importElements.add(new ImportElement(morty));
