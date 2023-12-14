@@ -77,7 +77,7 @@ public class Topaz {
     }
 
     private void configure() throws IOException, InterruptedException {
-        ProcessBuilder pb = new ProcessBuilder("topaz", "configure", "-r", "ghcr.io/aserto-policies/policy-todo:2.1.0", "-n", "todo", "-d");
+        ProcessBuilder pb = new ProcessBuilder("topaz", "configure", "-r", "ghcr.io/aserto-policies/policy-todo:2.1.0", "-n", "todo", "-d", "-f");
         pb.inheritIO();
         Process process = pb.start();
         process.waitFor();
