@@ -1,5 +1,6 @@
 package com.aserto.directory.v3;
 
+import com.aserto.directory.importer.v3.Opcode;
 import com.aserto.utils.MessageChunker;
 import com.aserto.directory.common.v3.ObjectIdentifier;
 import com.aserto.directory.common.v3.PaginationRequest;
@@ -385,9 +386,9 @@ public class DirectoryClient implements DirectoryClientReader,
 
         importStream.forEach(importElement -> {
             if (importElement.getObject() != null) {
-                writer.onNext(ImportRequest.newBuilder().setObject(importElement.getObject()).build());
+                writer.onNext(ImportRequest.newBuilder().setOpCode(importElement.getOpcode()).setObject(importElement.getObject()).build());
             } else if (importElement.getRelation() != null) {
-                writer.onNext(ImportRequest.newBuilder().setRelation(importElement.getRelation()).build());
+                writer.onNext(ImportRequest.newBuilder().setOpCode(importElement.getOpcode()).setRelation(importElement.getRelation()).build());
             }
         });
         writer.onCompleted();

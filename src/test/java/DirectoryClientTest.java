@@ -2,6 +2,7 @@ import com.aserto.ChannelBuilder;
 import com.aserto.directory.common.v3.ObjectDependency;
 import com.aserto.directory.exporter.v3.ExportResponse;
 import com.aserto.directory.exporter.v3.Option;
+import com.aserto.directory.importer.v3.Opcode;
 import com.aserto.directory.model.v3.GetManifestResponse;
 import com.aserto.directory.v3.Directory;
 import com.aserto.directory.v3.DirectoryClient;
@@ -428,13 +429,15 @@ class DirectoryClientTest {
         Relation mortyEditorRelation = Directory.buildRelation("group", "editor", "member", "user", "morty@the-citadel.com");
         Relation managerRelation = Directory.buildRelation("user", "rick@the-citadel.com", "manager", "user", "morty@the-citadel.com");
 
-        importElements.add(new ImportElement(rick));
-        importElements.add(new ImportElement(morty));
-        importElements.add(new ImportElement(adminGroup));
-        importElements.add(new ImportElement(editorGroup));
-        importElements.add(new ImportElement(rickAdminRelation));
-        importElements.add(new ImportElement(mortyEditorRelation));
-        importElements.add(new ImportElement(managerRelation));
+
+        Opcode opcode = Opcode.OPCODE_SET;
+        importElements.add(new ImportElement(rick, opcode));
+        importElements.add(new ImportElement(morty, opcode));
+        importElements.add(new ImportElement(adminGroup, opcode));
+        importElements.add(new ImportElement(editorGroup, opcode));
+        importElements.add(new ImportElement(rickAdminRelation, opcode));
+        importElements.add(new ImportElement(mortyEditorRelation, opcode));
+        importElements.add(new ImportElement(managerRelation, opcode));
 
         return importElements;
     }
