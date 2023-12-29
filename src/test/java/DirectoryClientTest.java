@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith({IntegrationTestsExtenion.class})
 class DirectoryClientTest {
     private static DirectoryClient directoryClient;
+    private static ManagedChannel channel;
 
     private final static String originalManifest =
             "# yaml-language-server: $schema=https://www.topaz.sh/schema/manifest.json\n" +
@@ -72,8 +73,8 @@ class DirectoryClientTest {
             "      member: user\n";
 
     @BeforeAll
-    static void setDirectoryClient() throws SSLException, InterruptedException {
-        ManagedChannel channel = new ChannelBuilder()
+    static void setDirectoryClient() throws SSLException {
+       channel = new ChannelBuilder()
                 .withHost("localhost")
                 .withPort(9292)
                 .withInsecure(true)
@@ -92,6 +93,37 @@ class DirectoryClientTest {
     @AfterEach
     void afterEach() {
         directoryClient.deleteManifest();
+    }
+
+    @AfterAll
+    static void closeChannel() {
+        channel.shutdown();
+    }
+
+
+    @Test
+    void testDirectoryClientWithReaderCanRead() {
+        // Arrange
+        DirectoryClient directoryClient = new DirectoryClient();
+        directoryClient.withReaderChannel(channel);
+
+        // Act & Assert
+        assertDoesNotThrow(() -> {
+            directoryClient.getObject("user", "rick@the-citadel.com");
+        });
+    }
+
+    @Test
+    void testDirectoryClientWithReaderCannotWrite() {
+        // Arrange
+        DirectoryClient directoryClient = new DirectoryClient();
+        directoryClient.withReaderChannel(channel);
+
+
+        // Act & Assert
+        assertThrows(NullPointerException.class, () -> {
+            directoryClient.setObject("test_type", "test_id");
+        });
     }
 
     @Test

@@ -24,7 +24,6 @@ public class Topaz {
                 .withInsecure(true)
                 .build();
         directoryClient = new DirectoryClient(channel);
-
     }
 
     public void run() throws IOException, InterruptedException, URISyntaxException {

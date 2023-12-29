@@ -50,14 +50,37 @@ public class DirectoryClient implements DirectoryClientReader,
     private ModelGrpc.ModelBlockingStub modelClient;
     private ModelGrpc.ModelStub modelClientAsync;
 
-    public DirectoryClient(ManagedChannel channelBuilder) {
-        DirectoryClientBuilder dirClientBuilder = new DirectoryClientBuilder(channelBuilder);
-        readerClient = dirClientBuilder.getReaderClient();
-        writerClient = dirClientBuilder.getWriterClient();
-        importerClient = dirClientBuilder.getImporterClient();
-        exporterClient = dirClientBuilder.getExporterClient();
-        modelClient = dirClientBuilder.getModelClient();
-        modelClientAsync = dirClientBuilder.getModelClientAsync();
+    public DirectoryClient() {
+    }
+
+    public DirectoryClient(ManagedChannel managedChannel) {
+        readerClient = ReaderGrpc.newBlockingStub(managedChannel);
+        writerClient = WriterGrpc.newBlockingStub(managedChannel);
+        importerClient = ImporterGrpc.newStub(managedChannel);
+        exporterClient = ExporterGrpc.newBlockingStub(managedChannel);
+        modelClient = ModelGrpc.newBlockingStub(managedChannel);
+        modelClientAsync = ModelGrpc.newStub(managedChannel);
+    }
+
+    public void withReaderChannel(ManagedChannel readerChannel) {
+        this.readerClient = ReaderGrpc.newBlockingStub(readerChannel);
+    }
+
+    public void withWriterChannel(ManagedChannel writerChannel) {
+        this.writerClient = WriterGrpc.newBlockingStub(writerChannel);
+    }
+
+    public void withImporterChannel(ManagedChannel importerChannel) {
+        this.importerClient = ImporterGrpc.newStub(importerChannel);
+    }
+
+    public void withExporterChannel(ManagedChannel exporterChannel) {
+        this.exporterClient = ExporterGrpc.newBlockingStub(exporterChannel);
+    }
+
+    public void withModelChannel(ManagedChannel modelChannel) {
+        this.modelClient = ModelGrpc.newBlockingStub(modelChannel);
+        this.modelClientAsync = ModelGrpc.newStub(modelChannel);
     }
 
     @Override
