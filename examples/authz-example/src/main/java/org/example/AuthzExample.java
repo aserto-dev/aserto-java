@@ -1,8 +1,8 @@
 package org.example;
 
 import com.aserto.AuthorizerClient;
-import com.aserto.AuthzClient;
 import com.aserto.ChannelBuilder;
+import com.aserto.authorizer.AuthzClient;
 import com.aserto.authorizer.v2.Decision;
 import com.aserto.authorizer.v2.api.IdentityType;
 import com.aserto.model.IdentityCtx;
