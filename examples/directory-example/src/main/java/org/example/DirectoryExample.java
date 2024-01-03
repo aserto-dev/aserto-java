@@ -1,19 +1,21 @@
 package org.example;
 
 import com.aserto.ChannelBuilder;
-import com.aserto.directory.v3.DirectoryClient;
 import com.aserto.directory.common.v3.ObjectIdentifier;
 import com.aserto.directory.reader.v3.GetObjectManyResponse;
 import com.aserto.directory.reader.v3.GetObjectResponse;
 import com.aserto.directory.reader.v3.GetObjectsResponse;
+import com.aserto.directory.v3.DirectoryClient;
+
 import com.aserto.directory.v3.Directory;
+import com.aserto.directory.v3.UninitilizedClientException;
 import io.grpc.ManagedChannel;
 
 import javax.net.ssl.SSLException;
 import java.util.List;
 
 public class DirectoryExample {
-    public static void main(String[] args) throws SSLException {
+    public static void main(String[] args) throws SSLException, UninitilizedClientException {
         // create a channel that has the connection details
         ManagedChannel channel = new ChannelBuilder()
                 .withHost("localhost")
@@ -29,19 +31,19 @@ public class DirectoryExample {
         getObjectManyRequest(directoryClient);
     }
 
-    public static void getUserExample(DirectoryClient directoryClient) {
+    public static void getUserExample(DirectoryClient directoryClient) throws UninitilizedClientException {
         System.out.println("------ Get user example ------");
         GetObjectResponse getObjectResponse = directoryClient.getObject("user", "morty@the-citadel.com", false);
         System.out.println(getObjectResponse);
     }
 
-    public static void getUsersExample(DirectoryClient directoryClient) {
+    public static void getUsersExample(DirectoryClient directoryClient) throws UninitilizedClientException {
         System.out.println("------ Get users example ------");
         GetObjectsResponse getObjectsResponse = directoryClient.getObjects("user", 100, "");
         System.out.println(getObjectsResponse);
     }
 
-    public static void getObjectManyRequest(DirectoryClient directoryClient) {
+    public static void getObjectManyRequest(DirectoryClient directoryClient) throws UninitilizedClientException {
         System.out.println("------ Get object many example ------");
         List<ObjectIdentifier> objects = List.of(
                 Directory.buildObjectIdentifier("user", "rick@the-citadel.com"),
