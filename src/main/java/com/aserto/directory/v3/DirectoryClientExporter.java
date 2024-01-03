@@ -7,6 +7,6 @@ import com.google.protobuf.Timestamp;
 import java.util.Iterator;
 
 public interface DirectoryClientExporter {
-    Iterator<ExportResponse> exportData(Option options);
-    Iterator<ExportResponse> exportData(Option options, Timestamp startFrom);
+    Iterator<ExportResponse> exportData(Option options) throws UninitilizedClientException;
+    Iterator<ExportResponse> exportData(Option options, Timestamp startFrom) throws UninitilizedClientException;
 }

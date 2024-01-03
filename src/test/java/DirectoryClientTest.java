@@ -10,6 +10,7 @@ import com.aserto.directory.common.v3.Object;
 import com.aserto.directory.common.v3.ObjectIdentifier;
 import com.aserto.directory.common.v3.Relation;
 import com.aserto.directory.reader.v3.*;
+import com.aserto.directory.v3.UninitilizedClientException;
 import com.aserto.directory.writer.v3.DeleteRelationResponse;
 import com.aserto.directory.writer.v3.SetObjectResponse;
 import com.aserto.directory.writer.v3.SetRelationResponse;
@@ -32,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith({IntegrationTestsExtenion.class})
 class DirectoryClientTest {
     private static DirectoryClient directoryClient;
+    private static ManagedChannel channel;
 
     private final static String originalManifest =
             "# yaml-language-server: $schema=https://www.topaz.sh/schema/manifest.json\n" +
@@ -72,8 +74,8 @@ class DirectoryClientTest {
             "      member: user\n";
 
     @BeforeAll
-    static void setDirectoryClient() throws SSLException, InterruptedException {
-        ManagedChannel channel = new ChannelBuilder()
+    static void setDirectoryClient() throws SSLException {
+       channel = new ChannelBuilder()
                 .withHost("localhost")
                 .withPort(9292)
                 .withInsecure(true)
@@ -83,19 +85,48 @@ class DirectoryClientTest {
     }
 
     @BeforeEach
-    void beforeEach() throws InterruptedException {
+    void beforeEach() throws InterruptedException, UninitilizedClientException {
         directoryClient.setManifest(originalManifest);
         List<ImportElement> list = importCitadelDataList();
         directoryClient.importData(list.stream());
     }
 
     @AfterEach
-    void afterEach() {
+    void afterEach() throws UninitilizedClientException {
         directoryClient.deleteManifest();
     }
 
+    @AfterAll
+    static void closeChannel() {
+        channel.shutdown();
+    }
+
+
     @Test
-    void testGetUserWithNoRelations() {
+    void testDirectoryClientWithReaderCanRead() {
+        // Arrange
+        DirectoryClient directoryClient = new DirectoryClient(channel, null, null, null, null);
+
+        // Act & Assert
+        assertDoesNotThrow(() -> {
+            directoryClient.getObject("user", "rick@the-citadel.com");
+        });
+    }
+
+    @Test
+    void testDirectoryClientWithReaderCannotWrite() {
+        // Arrange
+        DirectoryClient directoryClient = new DirectoryClient(channel, null, null, null, null);
+
+
+        // Act & Assert
+        assertThrows(UninitilizedClientException.class, () -> {
+            directoryClient.setObject("test_type", "test_id");
+        });
+    }
+
+    @Test
+    void testGetUserWithNoRelations() throws UninitilizedClientException {
         // Arrange
         Object managerObject = Directory.buildObject("user", "rick@the-citadel.com");
 
@@ -111,7 +142,7 @@ class DirectoryClientTest {
     }
 
     @Test
-    void testGetUserWithRelations() {
+    void testGetUserWithRelations() throws UninitilizedClientException {
         // Arrange
         Object managerObject = Directory.buildObject("user", "rick@the-citadel.com");
         Relation managerRelation = Directory.buildRelation("user", "rick@the-citadel.com", "manager", "user", "morty@the-citadel.com");
@@ -131,7 +162,7 @@ class DirectoryClientTest {
     }
 
     @Test
-    void testGetUsers() {
+    void testGetUsers() throws UninitilizedClientException {
         // Arrange & Act
         GetObjectsResponse getObjectsResponse = directoryClient.getObjects("user");
 
@@ -140,7 +171,7 @@ class DirectoryClientTest {
     }
 
     @Test
-    void testGetUsersWithLimit() {
+    void testGetUsersWithLimit() throws UninitilizedClientException {
         // Arrange & Act
         GetObjectsResponse getObjectsResponse = directoryClient.getObjects("user", 1, "");
 
@@ -152,7 +183,7 @@ class DirectoryClientTest {
     }
 
     @Test
-    void testGetUserManyRequest() {
+    void testGetUserManyRequest() throws UninitilizedClientException {
         // Arrange
         List<ObjectIdentifier> objects = List.of(
             Directory.buildObjectIdentifier("user", "rick@the-citadel.com"),
@@ -168,7 +199,7 @@ class DirectoryClientTest {
     }
 
     @Test
-    void testGetRelation() {
+    void testGetRelation() throws UninitilizedClientException {
         // Arrange
         Relation expectedRelation = Directory.buildRelation("user", "rick@the-citadel.com", "manager", "user", "morty@the-citadel.com");
 
@@ -189,7 +220,7 @@ class DirectoryClientTest {
     }
 
     @Test
-    void testGetRelations() {
+    void testGetRelations() throws UninitilizedClientException {
         // Arrange
         Relation expectedManagerRelation = Directory.buildRelation("user", "rick@the-citadel.com", "manager", "user", "morty@the-citadel.com");
         Relation expectedFriendRelation = Directory.buildRelation("user", "rick@the-citadel.com", "friend", "user", "morty@the-citadel.com");
@@ -214,7 +245,7 @@ class DirectoryClientTest {
     }
 
     @Test
-    void testCheckRelationManager() {
+    void testCheckRelationManager() throws UninitilizedClientException {
         // Arrange & Act
         CheckRelationResponse checkRelationResponse = directoryClient.checkRelation(
                 "user",
@@ -228,7 +259,7 @@ class DirectoryClientTest {
     }
 
     @Test
-    void testCheckRelationFriend() {
+    void testCheckRelationFriend() throws UninitilizedClientException {
         // Arrange & Act
         CheckRelationResponse checkRelationResponse = directoryClient.checkRelation(
                 "user",
@@ -242,7 +273,7 @@ class DirectoryClientTest {
     }
 
     @Test
-    void testCheckManager() {
+    void testCheckManager() throws UninitilizedClientException {
         // Arrange & Act
         CheckResponse checkResponse = directoryClient.check(
                 "user",
@@ -285,7 +316,7 @@ class DirectoryClientTest {
     }
 
     @Test
-    void setObjectTest() {
+    void setObjectTest() throws UninitilizedClientException {
         // Arrange
         Object object = Directory.buildObject("test_type", "test_id");
 
@@ -300,7 +331,7 @@ class DirectoryClientTest {
     }
 
     @Test
-    void deleteObjectTest() {
+    void deleteObjectTest() throws UninitilizedClientException {
         // Arrange
         directoryClient.setObject("test_type", "test_id");
         assertEquals(1, directoryClient.getObjects("test_type").getResultsList().size());
@@ -313,7 +344,7 @@ class DirectoryClientTest {
     }
 
     @Test
-    void setRelationTest() {
+    void setRelationTest() throws UninitilizedClientException {
         // Arrange
         Relation relation = Directory.buildRelation("user", "morty@the-citadel.com", "friend", "user", "rick@the-citadel.com");
 
@@ -333,7 +364,7 @@ class DirectoryClientTest {
     }
 
     @Test
-    void deleteRelationTest() {
+    void deleteRelationTest() throws UninitilizedClientException {
         // Arrange & Act
         DeleteRelationResponse deleteRelationResponse = directoryClient.deleteRelation(
                 "user",
@@ -356,7 +387,7 @@ class DirectoryClientTest {
     }
 
     @Test
-    void testGetManifest() {
+    void testGetManifest() throws UninitilizedClientException {
         // Arrange & Act
         GetManifestResponse getManifestResponse = directoryClient.getManifest();
 
@@ -365,7 +396,7 @@ class DirectoryClientTest {
     }
 
     @Test
-    void testSetManifest() throws InterruptedException {
+    void testSetManifest() throws InterruptedException, UninitilizedClientException {
         // Arrange & Act
         directoryClient.setManifest(modifiedManifest);
         GetManifestResponse getManifestResponse = directoryClient.getManifest();
@@ -375,7 +406,7 @@ class DirectoryClientTest {
     }
 
     @Test
-    void testDeleteManifest() {
+    void testDeleteManifest() throws UninitilizedClientException {
         // Arrange & Act
         directoryClient.deleteManifest();
         GetManifestResponse getManifestResponse = directoryClient.getManifest();
@@ -385,7 +416,7 @@ class DirectoryClientTest {
     }
 
     @Test
-    void importDataTest() throws InterruptedException {
+    void importDataTest() throws InterruptedException, UninitilizedClientException {
         // Arrange
         List<ImportElement> list = importCitadelDataList();
         List<Object> users = list.stream()
@@ -405,7 +436,7 @@ class DirectoryClientTest {
     }
 
     @Test
-    void exportDataTest() {
+    void exportDataTest() throws UninitilizedClientException {
         // Arrange & Act
         Iterator<ExportResponse> exportedData = directoryClient.exportData(Option.OPTION_DATA);
 
