@@ -5,7 +5,7 @@ Java library for Aserto services
 
 > **Warning**
 > 
-> **0.20.9** is the latest version published to maven central. Versions starting with 1.0.z have been removed from maven central and are no longer available for download.
+> **0.21.0** is the latest version published to maven central. Versions starting with 1.0.z have been removed from maven central and are no longer available for download.
 
 ### Build
 `mvn clean install`
@@ -25,14 +25,15 @@ mvn clean test
 ```
 
 ### Run integration tests
-In order to run integration tests we need to start [topaz](https://github.com/aserto-dev/topaz)
+In order to run integration tests we need to have [topaz](https://github.com/aserto-dev/topaz) installed
 ```bash
 go install github.com/topaz/cmd/topaz@latest
 topaz install
-topaz configure -d -s -r ghcr.io/aserto-policies/policy-todo-rebac:latest todo
-topaz run
 ```
-and then run the integration tests
+
+The integration tests start topaz and configure it for testing. The tests will fail if topaz is not installed.
+If you have topaz configured, no worries, the tests will save the configuration and restore it after the integration tests are finished.
+To run the integration tests use the fallowing command:
 ```
 mvn test -Pintegration
 ```
@@ -42,7 +43,7 @@ mvn test -Pintegration
 mvn clean deploy -Dgpg.passphrase="<gpg-passphrase>" -Pci-cd
 ```
 
-## Example
+## Authorization Example
 Start [topaz](https://github.com/aserto-dev/topaz)
 
 ```java
@@ -54,7 +55,7 @@ ManagedChannel channel = new ChannelBuilder()
         .build();
 
 // create authz client
-AuthorizerClient authzClient =  new AuthzClient(channel);
+AuthorizerClient authzClient = new AuthzClient(channel);
 
 // identity context contains information abou the user that requests access to some resource
 IdentityCtx identityCtx = new IdentityCtx("rick@the-citadel.com", IdentityType.IDENTITY_TYPE_SUB);
@@ -72,3 +73,4 @@ decisions.forEach(decision -> {
     System.out.println("For decision [" + dec + "] the answer was [" + isAllowed + "]");
 });
 ```
+For more examples have a look in the [examples](examples) folder.
