@@ -1,6 +1,5 @@
 package com.aserto.directory.v3;
 
-import com.aserto.directory.importer.v3.Opcode;
 import com.aserto.utils.MessageChunker;
 import com.aserto.directory.common.v3.ObjectIdentifier;
 import com.aserto.directory.common.v3.PaginationRequest;
