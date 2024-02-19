@@ -54,12 +54,15 @@ class DirectoryClientTest {
             "    relations:\n" +
             "      ### display_name: user#manager ###\n" +
             "      manager: user\n" +
+            "      friend: user\n" +
             "\n" +
             "  ### display_name: Identity ###\n" +
             "  identity:\n" +
             "    relations:\n" +
             "      ### display_name: identity#identifier ###\n" +
             "      identifier: user\n" +
+            "\n" +
+            "  test_type:\n" +
             "\n" +
             "  ### display_name: Group ###\n" +
             "  group:\n" +
