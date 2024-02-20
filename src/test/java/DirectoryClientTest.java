@@ -1,5 +1,4 @@
 import com.aserto.ChannelBuilder;
-import com.aserto.directory.common.v2.ObjectDependency;
 import com.aserto.directory.exporter.v3.ExportResponse;
 import com.aserto.directory.exporter.v3.Option;
 import com.aserto.directory.importer.v3.Opcode;
