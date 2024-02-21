@@ -1,5 +1,4 @@
 import com.aserto.ChannelBuilder;
-import com.aserto.directory.common.v3.ObjectDependency;
 import com.aserto.directory.exporter.v3.ExportResponse;
 import com.aserto.directory.exporter.v3.Option;
 import com.aserto.directory.importer.v3.Opcode;
@@ -54,12 +53,15 @@ class DirectoryClientTest {
             "    relations:\n" +
             "      ### display_name: user#manager ###\n" +
             "      manager: user\n" +
+            "      friend: user\n" +
             "\n" +
             "  ### display_name: Identity ###\n" +
             "  identity:\n" +
             "    relations:\n" +
             "      ### display_name: identity#identifier ###\n" +
             "      identifier: user\n" +
+            "\n" +
+            "  test_type:\n" +
             "\n" +
             "  ### display_name: Group ###\n" +
             "  group:\n" +
@@ -290,19 +292,17 @@ class DirectoryClientTest {
     void testGetGraph() {
         // Arrange
         GetGraphRequest getGraphRequest = GetGraphRequest.newBuilder()
-                .setAnchorType("user")
-                .setAnchorId("rick@the-citadel.com")
                 .setObjectType("user")
                 .setObjectId("rick@the-citadel.com")
+                .setRelation("manager")
+                .setSubjectType("user")
+                .setSubjectId("morty@the-citadel.com")
                 .build();
 
-                List<ObjectDependency> objectDependencyList = Arrays.asList(
-                    ObjectDependency.newBuilder()
+                List<ObjectIdentifier> objectDependencyList = Arrays.asList(
+                    ObjectIdentifier.newBuilder()
                             .setObjectType("user")
-                            .setObjectId("rick@the-citadel.com")
-                            .setRelation("manager")
-                            .setSubjectType("user")
-                            .setSubjectId("morty@the-citadel.com")
+                            .setObjectId("morty@the-citadel.com")
                             .build()
                 );
 
@@ -319,7 +319,7 @@ class DirectoryClientTest {
     void setObjectTest() throws UninitilizedClientException {
         // Arrange
         Object object = Directory.buildObject("test_type", "test_id");
-
+        
         // Act
         SetObjectResponse setObjectResponse = directoryClient.setObject("test_type", "test_id");
 

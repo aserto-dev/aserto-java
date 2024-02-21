@@ -55,7 +55,7 @@
         <dependency>
             <groupId>com.aserto</groupId>
             <artifactId>java-directory</artifactId>
-            <version>0.30.2</version>
+            <version>0.31.0</version>
         </dependency>
 
         <!-- Used for unit testing -->
