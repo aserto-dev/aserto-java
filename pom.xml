@@ -6,7 +6,7 @@
 
     <groupId>com.aserto</groupId>
     <artifactId>aserto-java</artifactId>
-    <version>0.21.1</version>
+    <version>0.31.0</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Java SDK to interact with aserto services</description>
