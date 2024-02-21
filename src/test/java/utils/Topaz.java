@@ -42,7 +42,7 @@ public class Topaz {
     }
 
     private void start() throws IOException, InterruptedException {
-        ProcessBuilder pb = new ProcessBuilder("topaz","start", "--container-version", "model-v2.3");
+        ProcessBuilder pb = new ProcessBuilder("topaz","start");
         pb.inheritIO();
         Process process = pb.start();
         process.waitFor();
