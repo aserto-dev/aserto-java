@@ -42,7 +42,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <grpc.version>1.60.1</grpc.version>
-        <log4j.version>2.22.0</log4j.version>
+        <log4j.version>2.22.1</log4j.version>
         <exclude-tests>IntegrationTest</exclude-tests>
     </properties>
 
@@ -103,7 +103,7 @@
             <id>integration</id>
             <properties>
                 <!-- override exclude-tests property to remove IntegrationTest from it-->
-                <exclude-tests></exclude-tests>
+                <exclude-tests/>
             </properties>
         </profile>
 
