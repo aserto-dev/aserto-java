@@ -8,7 +8,7 @@ import java.net.URISyntaxException;
 
 import static org.junit.jupiter.api.extension.ExtensionContext.Namespace.GLOBAL;
 
-public class IntegrationTestsExtenion implements BeforeAllCallback, ExtensionContext.Store.CloseableResource {
+public class IntegrationTestsExtension implements BeforeAllCallback, ExtensionContext.Store.CloseableResource {
 
     private static boolean started = false;
     private static Topaz topaz;

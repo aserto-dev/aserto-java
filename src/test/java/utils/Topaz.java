@@ -13,7 +13,7 @@ import java.util.concurrent.*;
 
 public class Topaz {
     private String HOME_DIR = System.getProperty("user.home");
-    private String DB_DIR = HOME_DIR + "/.config/topaz/db";
+    private String DB_DIR = HOME_DIR + "/.local/share/topaz/db";
     private String TOPAZ_CFG_DIR = HOME_DIR + "/.config/topaz/cfg";
     private DirectoryClient directoryClient;
 
@@ -35,78 +35,86 @@ public class Topaz {
     }
 
     public void stop() throws IOException, InterruptedException {
-        Process process = new ProcessBuilder("topaz","stop").start();
+        ProcessBuilder pb = new ProcessBuilder("topaz","stop");
+        pb.inheritIO();
+        Process process = pb.start();
         process.waitFor();
         restoreDb();
         restoreCfg();
     }
 
     private void start() throws IOException, InterruptedException {
-        ProcessBuilder pb = new ProcessBuilder("topaz","start");
+        ProcessBuilder pb = new ProcessBuilder("topaz","start","--wait");
         pb.inheritIO();
         Process process = pb.start();
         process.waitFor();
-        process.waitFor();
 
-        final Duration timeout = Duration.ofSeconds(60);
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        // final Duration timeout = Duration.ofSeconds(60);
+        // ExecutorService executor = Executors.newSingleThreadExecutor();
 
-        final Future<Integer> handler = executor.submit(new Callable() {
-            @Override
-            public Integer call() throws Exception {
-                while (true) {
-                    try {
-                        directoryClient.getObjects("user");
-                    } catch (Exception e) {
-                        Thread.sleep(2000);
-                        continue;
-                    }
+        // final Future<Integer> handler = executor.submit(new Callable() {
+        //     @Override
+        //     public Integer call() throws Exception {
+        //         while (true) {
+        //             try {
+        //                 directoryClient.getObjects("user");
+        //             } catch (Exception e) {
+        //                 Thread.sleep(2000);
+        //                 continue;
+        //             }
 
-                    return directoryClient.getObjects("user").getResultsList().size();
-                }
-            }
-        });
+        //             return directoryClient.getObjects("user").getResultsList().size();
+        //         }
+        //     }
+        // });
 
-        try {
-            handler.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
-        } catch (TimeoutException | InterruptedException | ExecutionException e) {
-            handler.cancel(true);
-        }
-
+        // try {
+        //     handler.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+        // } catch (TimeoutException | InterruptedException | ExecutionException e) {
+        //     handler.cancel(true);
+        // }
     }
 
     private void configure() throws IOException, InterruptedException {
-        ProcessBuilder pb = new ProcessBuilder("topaz", "configure", "-r", "ghcr.io/aserto-policies/policy-todo:2.1.0", "-n", "todo", "-d", "-f");
-        pb.inheritIO();
-        Process process = pb.start();
-        process.waitFor();
+        {
+            ProcessBuilder pb = new ProcessBuilder("topaz", "config", "new", "--name", "todo-test", "--resource", "ghcr.io/aserto-policies/policy-todo:2.1.0", "--force");
+            pb.inheritIO();
+            Process process = pb.start();
+            process.waitFor();
+        }
+        {
+            ProcessBuilder pb = new ProcessBuilder("topaz", "config", "use", "todo-test");
+            pb.inheritIO();
+            Process process = pb.start();
+            process.waitFor();
+        }
     }
 
     private void backupDb() {
-        File directoryDb = new File(DB_DIR + "/directory.db" );
+        File directoryDb = new File(DB_DIR + "/todo-test.db" );
         if(directoryDb.exists()) {
-            directoryDb.renameTo(new File(DB_DIR + "/directory.db.bak" ));
+            directoryDb.renameTo(new File(DB_DIR + "/todo-test.db.bak" ));
         }
     }
 
     private void restoreDb() {
-        File directoryDb = new File(DB_DIR + "/directory.db.bak" );
+        File directoryDb = new File(DB_DIR + "/todo-test.db.bak" );
         if(directoryDb.exists()) {
-            directoryDb.renameTo(new File(DB_DIR + "/directory.db" ));
+            directoryDb.renameTo(new File(DB_DIR + "/todo-test.db" ));
         }
     }
 
     private void backupCfg() {
-        File directoryDb = new File(TOPAZ_CFG_DIR + "/config.yaml" );
+        File directoryDb = new File(TOPAZ_CFG_DIR + "/todo-test.yaml" );
         if(directoryDb.exists()) {
-            directoryDb.renameTo(new File(TOPAZ_CFG_DIR + "/config.yaml.bak" ));
+            directoryDb.renameTo(new File(TOPAZ_CFG_DIR + "/todo-test.yaml.bak" ));
         }
     }
 
     private void restoreCfg() {
-        File directoryDb = new File(TOPAZ_CFG_DIR + "/config.yaml.bak" );
+        File directoryDb = new File(TOPAZ_CFG_DIR + "/todo-test.yaml.bak" );
         if(directoryDb.exists()) {
-            directoryDb.renameTo(new File(TOPAZ_CFG_DIR + "/config.yaml" ));
+            directoryDb.renameTo(new File(TOPAZ_CFG_DIR + "/todo-test.yaml" ));
         }
     }
 }

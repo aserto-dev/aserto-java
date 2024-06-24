@@ -6,7 +6,7 @@ import io.grpc.StatusRuntimeException;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import utils.IntegrationTestsExtenion;
+import utils.IntegrationTestsExtension;
 
 import javax.net.ssl.SSLException;
 import java.io.IOException;
@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Tag("IntegrationTest")
-@ExtendWith({IntegrationTestsExtenion.class})
+@ExtendWith({IntegrationTestsExtension.class})
 class AuthzClientIntegrationTest {
     @Test
     void testBuildAuthzClient() throws IOException {
@@ -25,7 +25,7 @@ class AuthzClientIntegrationTest {
                 .withHost("localhost")
                 .withPort(8282)
                 .withInsecure(false)
-                .withCACertPath(System.getProperty("user.home") + "/.config/topaz/certs/grpc-ca.crt")
+                .withCACertPath(System.getProperty("user.home") + "/.local/share/topaz/certs/grpc-ca.crt")
                 .build();
 
         AuthzClient authzClient =  new AuthzClient(channel);
