@@ -18,7 +18,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.StatusRuntimeException;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import utils.IntegrationTestsExtenion;
+import utils.IntegrationTestsExtension;
 
 import javax.net.ssl.SSLException;
 
@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("IntegrationTest")
-@ExtendWith({IntegrationTestsExtenion.class})
+@ExtendWith({IntegrationTestsExtension.class})
 class DirectoryClientTest {
     private static DirectoryClient directoryClient;
     private static ManagedChannel channel;
@@ -138,7 +138,7 @@ class DirectoryClientTest {
         // Assert
         assertThat(getObjectResponse.getResult())
                 .usingRecursiveComparison()
-                .comparingOnlyFields("objectType_", "objectId_")
+                .comparingOnlyFields("type_", "id_")
                 .isEqualTo(managerObject);
         assertEquals(0, getObjectResponse.getRelationsList().size());
     }
@@ -156,7 +156,7 @@ class DirectoryClientTest {
         // Assert
         assertThat(getObjectResponse.getResult())
                 .usingRecursiveComparison()
-                .comparingOnlyFields("objectType_", "objectId_")
+                .comparingOnlyFields("type_", "id_")
                 .isEqualTo(managerObject);
         assertThat(getObjectResponse.getRelationsList())
                 .usingRecursiveFieldByFieldElementComparatorOnFields("objectId_", "objectType_", "relation_", "subjectId_", "subjectType_")
@@ -311,7 +311,7 @@ class DirectoryClientTest {
 
         // Assert
         assertThat(getGraphResponse.getResultsList())
-                .usingRecursiveFieldByFieldElementComparatorOnFields("objectId_", "objectType_", "relation_", "subjectId_", "subjectType_")
+                .usingRecursiveFieldByFieldElementComparatorOnFields("objectType_", "objectId_")
                 .containsExactlyInAnyOrderElementsOf(objectDependencyList);
     }
 
@@ -430,9 +430,8 @@ class DirectoryClientTest {
         // Assert
         GetObjectsResponse getObjectsResponse = directoryClient.getObjects("user");
         assertThat(getObjectsResponse.getResultsList())
-                .usingRecursiveFieldByFieldElementComparatorOnFields("objectId_", "objectType_", "relation_", "subjectId_", "subjectType_")
+                .usingRecursiveFieldByFieldElementComparatorOnFields("type_", "id_")
                 .containsAll(users);
-
     }
 
     @Test
