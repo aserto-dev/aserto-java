@@ -50,7 +50,7 @@
         <dependency>
             <groupId>com.aserto</groupId>
             <artifactId>java-authorizer</artifactId>
-            <version>0.20.11</version>
+            <version>0.20.12</version>
         </dependency>
         <dependency>
             <groupId>com.aserto</groupId>
@@ -103,7 +103,7 @@
             <id>integration</id>
             <properties>
                 <!-- override exclude-tests property to remove IntegrationTest from it-->
-                <exclude-tests></exclude-tests>
+                <exclude-tests/>
             </properties>
         </profile>
 
