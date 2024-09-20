@@ -55,7 +55,7 @@
         <dependency>
             <groupId>com.aserto</groupId>
             <artifactId>java-directory</artifactId>
-            <version>0.31.2</version>
+            <version>0.31.3</version>
         </dependency>
 
         <!-- Used for unit testing -->
@@ -103,7 +103,7 @@
             <id>integration</id>
             <properties>
                 <!-- override exclude-tests property to remove IntegrationTest from it-->
-                <exclude-tests></exclude-tests>
+                <exclude-tests/>
             </properties>
         </profile>
 
