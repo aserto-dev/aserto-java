@@ -1,26 +1,45 @@
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.net.ssl.SSLException;
+
+import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import static org.mockito.AdditionalAnswers.delegatesTo;
+import static org.mockito.Mockito.mock;
+
 import com.aserto.AuthorizerClient;
 import com.aserto.authorizer.AuthzClient;
-import com.aserto.authorizer.v2.*;
+import com.aserto.authorizer.v2.AuthorizerGrpc;
+import com.aserto.authorizer.v2.Decision;
+import com.aserto.authorizer.v2.DecisionTreeRequest;
+import com.aserto.authorizer.v2.DecisionTreeResponse;
+import com.aserto.authorizer.v2.GetPolicyRequest;
+import com.aserto.authorizer.v2.GetPolicyResponse;
+import com.aserto.authorizer.v2.IsRequest;
+import com.aserto.authorizer.v2.IsResponse;
+import com.aserto.authorizer.v2.ListPoliciesRequest;
+import com.aserto.authorizer.v2.ListPoliciesResponse;
+import com.aserto.authorizer.v2.QueryRequest;
+import com.aserto.authorizer.v2.QueryResponse;
 import com.aserto.authorizer.v2.api.IdentityType;
 import com.aserto.authorizer.v2.api.Module;
 import com.aserto.model.IdentityCtx;
 import com.aserto.model.PolicyCtx;
 import com.google.protobuf.Struct;
 import com.google.protobuf.Value;
+
 import io.grpc.ManagedChannel;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.GrpcCleanupRule;
-import org.junit.jupiter.api.*;
-
-import javax.net.ssl.SSLException;
-import java.io.IOException;
-import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.AdditionalAnswers.delegatesTo;
-import static org.mockito.Mockito.mock;
 
 
 class AuthzClientTest {
@@ -213,7 +232,7 @@ class AuthzClientTest {
         assertEquals(policyPath, policyResponse.getId());
     }
 
-    private boolean compareLists(List list1, List list2) {
+    private boolean compareLists(List<Decision> list1, List<Decision> list2) {
         if (list1.size() != list2.size()) {
             return false;
         }

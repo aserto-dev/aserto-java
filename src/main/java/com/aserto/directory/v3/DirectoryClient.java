@@ -22,6 +22,7 @@ import com.aserto.directory.common.v3.Object;
 
 import com.google.protobuf.Timestamp;
 import io.grpc.ManagedChannel;
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -49,7 +50,13 @@ public class DirectoryClient implements DirectoryClientReader,
     private ModelGrpc.ModelBlockingStub modelClient;
     private ModelGrpc.ModelStub modelClientAsync;
 
-    public DirectoryClient(ManagedChannel readerChannel, ManagedChannel writerChannel, ManagedChannel importerChannel, ManagedChannel exporterChannel, ManagedChannel modelChannel) {
+    public DirectoryClient(
+        ManagedChannel readerChannel,
+        ManagedChannel writerChannel,
+        ManagedChannel importerChannel,
+        ManagedChannel exporterChannel,
+        ManagedChannel modelChannel
+    ) {
         if (readerChannel != null) {
             readerClient = ReaderGrpc.newBlockingStub(readerChannel);
         }
@@ -134,17 +141,50 @@ public class DirectoryClient implements DirectoryClientReader,
     }
 
     @Override
-    public GetRelationResponse getRelation(String objectType, String objectId, String relationName, String subjectType, String subjectId) throws UninitilizedClientException {
+    public GetRelationResponse getRelation(
+        String objectType,
+        String objectId,
+        String relationName,
+        String subjectType,
+        String subjectId
+    ) throws UninitilizedClientException {
         return getRelation(objectType, objectId, relationName, subjectType, subjectId, "", false);
     }
 
     @Override
-    public GetRelationResponse getRelation(String objectType, String objectId, String relationName, String subjectType, String subjectId, String subjectRelation) throws UninitilizedClientException {
+    public GetRelationResponse getRelation(
+        String objectType,
+        String objectId,
+        String relationName,
+        String subjectType,
+        String subjectId,
+        boolean withObjects
+    ) throws UninitilizedClientException {
+        return getRelation(objectType, objectId, relationName, subjectType, subjectId, "", withObjects);
+    }
+
+    @Override
+    public GetRelationResponse getRelation(
+        String objectType,
+        String objectId,
+        String relationName,
+        String subjectType,
+        String subjectId,
+        String subjectRelation
+    ) throws UninitilizedClientException {
         return getRelation(objectType, objectId, relationName, subjectType, subjectId, subjectRelation, false);
     }
 
     @Override
-    public GetRelationResponse getRelation(String objectType, String objectId, String relationName, String subjectType, String subjectId, String subjectRelation, boolean withObjects) throws UninitilizedClientException {
+    public GetRelationResponse getRelation(
+        String objectType,
+        String objectId,
+        String relationName,
+        String subjectType,
+        String subjectId,
+        String subjectRelation,
+        boolean withObjects
+    ) throws UninitilizedClientException {
         if (readerClient == null) {
             throw new UninitilizedClientException("Reader client is not initialized");
         }
@@ -169,13 +209,38 @@ public class DirectoryClient implements DirectoryClientReader,
         return readerClient.getRelations(relationsRequest);
     }
 
+    /**
+     * Checks whether a subject has a given permission on an object.
+     *
+     * @deprecated use @link {@link #check(String, String, String, String, String)} instead.
+     */
+    @Deprecated
     @Override
-    public CheckPermissionResponse checkPermission(String objectType, String objectId, String subjectType, String subjectId, String permissionName) throws UninitilizedClientException {
+    public CheckPermissionResponse checkPermission(
+        String objectType,
+        String objectId,
+        String subjectType,
+        String subjectId,
+        String permissionName
+    ) throws UninitilizedClientException {
         return checkPermission(objectType, objectId, subjectType, subjectId, permissionName, false);
     }
 
+    /**
+     * Checks whether a subject has a given permission on an object.
+     *
+     * @deprecated use @link {@link #check(String, String, String, String, String, boolean)} instead.
+     */
+    @Deprecated
     @Override
-    public CheckPermissionResponse checkPermission(String objectType, String objectId, String subjectType, String subjectId, String permissionName, boolean trace) throws UninitilizedClientException {
+    public CheckPermissionResponse checkPermission(
+        String objectType,
+        String objectId,
+        String subjectType,
+        String subjectId,
+        String permissionName,
+        boolean trace
+    ) throws UninitilizedClientException {
         if (readerClient == null) {
             throw new UninitilizedClientException("Reader client is not initialized");
         }
@@ -190,13 +255,38 @@ public class DirectoryClient implements DirectoryClientReader,
                 .build());
     }
 
+    /**
+     * Checks whether a subject has a given relation to an object.
+     *
+     * @deprecated use @link {@link #check(String, String, String, String, String)} instead.
+     */
+    @Deprecated
     @Override
-    public CheckRelationResponse checkRelation(String objectType, String objectId, String relationName, String subjectType, String subjectId) throws UninitilizedClientException {
+    public CheckRelationResponse checkRelation(
+        String objectType,
+        String objectId,
+        String relationName,
+        String subjectType,
+        String subjectId
+    ) throws UninitilizedClientException {
         return checkRelation(objectType, objectId, relationName, subjectType, subjectId, false);
     }
 
+    /**
+     * Checks whether a subject has a given relation to an object.
+     *
+     * @deprecated use @link {@link #check(String, String, String, String, String, boolean)} instead.
+     */
+    @Deprecated
     @Override
-    public CheckRelationResponse checkRelation(String objectType, String objectId, String relationName, String subjectType, String subjectId, boolean trace) throws UninitilizedClientException {
+    public CheckRelationResponse checkRelation(
+        String objectType,
+        String objectId,
+        String relationName,
+        String subjectType,
+        String subjectId,
+        boolean trace
+    ) throws UninitilizedClientException {
         if (readerClient == null) {
             throw new UninitilizedClientException("Reader client is not initialized");
         }
@@ -212,12 +302,25 @@ public class DirectoryClient implements DirectoryClientReader,
     }
 
     @Override
-    public CheckResponse check(String objectType, String objectId, String relationName, String subjectType, String subjectId) throws UninitilizedClientException {
+    public CheckResponse check(
+        String objectType,
+        String objectId,
+        String relationName,
+        String subjectType,
+        String subjectId
+    ) throws UninitilizedClientException {
         return check(objectType, objectId, relationName, subjectType, subjectId, false);
     }
 
     @Override
-    public CheckResponse check(String objectType, String objectId, String relationName, String subjectType, String subjectId, boolean trace) throws UninitilizedClientException {
+    public CheckResponse check(
+        String objectType,
+        String objectId,
+        String relationName,
+        String subjectType,
+        String subjectId,
+        boolean trace
+    ) throws UninitilizedClientException {
         if (readerClient == null) {
             throw new UninitilizedClientException("Reader client is not initialized");
         }
@@ -243,7 +346,13 @@ public class DirectoryClient implements DirectoryClientReader,
     }
 
     @Override
-    public SetObjectResponse setObject(String type, String id, String displayName, Struct properties, String hash) throws UninitilizedClientException {
+    public SetObjectResponse setObject(
+        String type,
+        String id,
+        String displayName,
+        Struct properties,
+        String hash
+    ) throws UninitilizedClientException {
         if (writerClient == null) {
             throw new UninitilizedClientException("Writer client is not initialized");
         }
@@ -284,7 +393,13 @@ public class DirectoryClient implements DirectoryClientReader,
     }
 
     @Override
-    public SetRelationResponse setRelation(String objectType, String objectId, String relationName, String subjectType, String subjectId) throws UninitilizedClientException {
+    public SetRelationResponse setRelation(
+        String objectType,
+        String objectId,
+        String relationName,
+        String subjectType,
+        String subjectId
+    ) throws UninitilizedClientException {
         if (writerClient == null) {
             throw new UninitilizedClientException("Writer client is not initialized");
         }
@@ -301,7 +416,14 @@ public class DirectoryClient implements DirectoryClientReader,
     }
 
     @Override
-    public SetRelationResponse setRelation(String objectType, String objectId, String relationName, String subjectType, String subjectId, String subjectRelation) throws UninitilizedClientException {
+    public SetRelationResponse setRelation(
+        String objectType,
+        String objectId,
+        String relationName,
+        String subjectType,
+        String subjectId,
+        String subjectRelation
+    ) throws UninitilizedClientException {
         if (writerClient == null) {
             throw new UninitilizedClientException("Writer client is not initialized");
         }
@@ -319,7 +441,15 @@ public class DirectoryClient implements DirectoryClientReader,
     }
 
     @Override
-    public SetRelationResponse setRelation(String objectType, String objectId, String relationName, String subjectType, String subjectId, String subjectRelation, String hash) throws UninitilizedClientException {
+    public SetRelationResponse setRelation(
+        String objectType,
+        String objectId,
+        String relationName,
+        String subjectType,
+        String subjectId,
+        String subjectRelation,
+        String hash
+    ) throws UninitilizedClientException {
         if (writerClient == null) {
             throw new UninitilizedClientException("Writer client is not initialized");
         }
@@ -338,7 +468,13 @@ public class DirectoryClient implements DirectoryClientReader,
     }
 
     @Override
-    public DeleteRelationResponse deleteRelation(String objectType, String objectId, String relationName, String subjectType, String subjectId) throws UninitilizedClientException {
+    public DeleteRelationResponse deleteRelation(
+        String objectType,
+        String objectId,
+        String relationName,
+        String subjectType,
+        String subjectId
+    ) throws UninitilizedClientException {
         if (writerClient == null) {
             throw new UninitilizedClientException("Writer client is not initialized");
         }
@@ -353,7 +489,14 @@ public class DirectoryClient implements DirectoryClientReader,
     }
 
     @Override
-    public DeleteRelationResponse deleteRelation(String objectType, String objectId, String relationName, String subjectType, String subjectId, String subjectRelation) throws UninitilizedClientException {
+    public DeleteRelationResponse deleteRelation(
+        String objectType,
+        String objectId,
+        String relationName,
+        String subjectType,
+        String subjectId,
+        String subjectRelation
+    ) throws UninitilizedClientException {
         if (writerClient == null) {
             throw new UninitilizedClientException("Writer client is not initialized");
         }
@@ -428,7 +571,7 @@ public class DirectoryClient implements DirectoryClientReader,
         };
 
         StreamObserver<SetManifestRequest> writeStream = modelClientAsync.setManifest(readStream);
-        
+
         MessageChunker chunker = new MessageChunker(MAX_CHUNK_SIZE, manifest.getBytes());
         while (chunker.hasNextChunk()) {
             byte[] chunk = chunker.nextChunk();
@@ -456,44 +599,30 @@ public class DirectoryClient implements DirectoryClientReader,
 
     @Override
     public void importData(Stream<ImportElement> importStream) throws InterruptedException, UninitilizedClientException {
+        importData(importStream, new NullImportHandler());
+    }
+
+    @Override
+    public Status importData(Stream<ImportElement> importStream, ImportHandler handler) throws InterruptedException, UninitilizedClientException {
         if (importerClient == null) {
             throw new UninitilizedClientException("Import client is not initialized");
         }
 
-        CountDownLatch latch = new CountDownLatch(1);
-        StreamObserver<ImportResponse> readStream = new StreamObserver<ImportResponse>() {
-            @Override
-            public void onNext(ImportResponse importResponse) {
-                logger.info("Received response: [{}] ", importResponse.getObject());
-            }
+        ImportObserver responses = new ImportObserver(handler);
+        StreamObserver<ImportRequest> requests = importerClient.import_(responses);
 
-            @Override
-            public void onError(Throwable throwable) {
-                logger.error("Error from server: [{}]: ", throwable.getMessage());
-            }
-
-            @Override
-            public void onCompleted() {
-                logger.trace("Server completed importStream.");
-                latch.countDown();
-            }
-        };
-
-        StreamObserver<ImportRequest> writer = importerClient.import_(readStream);
-
-        importStream.forEach(importElement -> {
+        importStream.takeWhile(
+            t -> responses.getStatus().isOk()
+        ).forEach(importElement -> {
             if (importElement.getObject() != null) {
-                writer.onNext(ImportRequest.newBuilder().setOpCode(importElement.getOpcode()).setObject(importElement.getObject()).build());
+                requests.onNext(ImportRequest.newBuilder().setOpCode(importElement.getOpcode()).setObject(importElement.getObject()).build());
             } else if (importElement.getRelation() != null) {
-                writer.onNext(ImportRequest.newBuilder().setOpCode(importElement.getOpcode()).setRelation(importElement.getRelation()).build());
+                requests.onNext(ImportRequest.newBuilder().setOpCode(importElement.getOpcode()).setRelation(importElement.getRelation()).build());
             }
         });
-        writer.onCompleted();
+        requests.onCompleted();
 
-        boolean timedOut = !latch.await(5, TimeUnit.SECONDS);
-        if (timedOut) {
-            logger.error("Timed out waiting for server response.");
-        }
+        return responses.await(5, TimeUnit.SECONDS);
     }
 
     @Override
