@@ -1,19 +1,21 @@
-import com.aserto.authorizer.AuthzClient;
-import com.aserto.ChannelBuilder;
-import com.aserto.authorizer.v2.api.Module;
-import io.grpc.ManagedChannel;
-import io.grpc.StatusRuntimeException;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import utils.IntegrationTestsExtension;
-
-import javax.net.ssl.SSLException;
 import java.io.IOException;
 import java.util.List;
 
+import javax.net.ssl.SSLException;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import com.aserto.ChannelBuilder;
+import com.aserto.authorizer.AuthzClient;
+import com.aserto.authorizer.v2.api.Module;
+
+import io.grpc.ManagedChannel;
+import io.grpc.StatusRuntimeException;
+import utils.IntegrationTestsExtension;
 
 @Tag("IntegrationTest")
 @ExtendWith({IntegrationTestsExtension.class})
@@ -58,6 +60,7 @@ class AuthzClientIntegrationTest {
     }
 
     @Test
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
     void testFailWhenSecureConnectionToInsecureClient() throws SSLException {
         // Arrange
         ManagedChannel channel = new ChannelBuilder()
@@ -69,7 +72,7 @@ class AuthzClientIntegrationTest {
         AuthzClient authzClient =  new AuthzClient(channel);
 
         // Act & Assert
-        StatusRuntimeException exception = assertThrows(StatusRuntimeException.class, () -> {
+        assertThrows(StatusRuntimeException.class, () -> {
             authzClient.listPolicies("todo", "todo");
         });
         authzClient.close();

@@ -1,32 +1,58 @@
-import com.aserto.ChannelBuilder;
-import com.aserto.directory.exporter.v3.ExportResponse;
-import com.aserto.directory.exporter.v3.Option;
-import com.aserto.directory.importer.v3.Opcode;
-import com.aserto.directory.model.v3.GetManifestResponse;
-import com.aserto.directory.v3.Directory;
-import com.aserto.directory.v3.DirectoryClient;
-import com.aserto.directory.common.v3.Object;
-import com.aserto.directory.common.v3.ObjectIdentifier;
-import com.aserto.directory.common.v3.Relation;
-import com.aserto.directory.reader.v3.*;
-import com.aserto.directory.v3.UninitilizedClientException;
-import com.aserto.directory.writer.v3.DeleteRelationResponse;
-import com.aserto.directory.writer.v3.SetObjectResponse;
-import com.aserto.directory.writer.v3.SetRelationResponse;
-import com.aserto.model.ImportElement;
-import io.grpc.ManagedChannel;
-import io.grpc.StatusRuntimeException;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
-import utils.IntegrationTestsExtension;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.net.ssl.SSLException;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import com.aserto.ChannelBuilder;
+import com.aserto.directory.common.v3.Object;
+import com.aserto.directory.common.v3.ObjectIdentifier;
+import com.aserto.directory.common.v3.Relation;
+import com.aserto.directory.exporter.v3.ExportResponse;
+import com.aserto.directory.exporter.v3.Option;
+import com.aserto.directory.importer.v3.ImportRequest;
+import com.aserto.directory.importer.v3.Opcode;
+import com.aserto.directory.model.v3.GetManifestResponse;
+import com.aserto.directory.reader.v3.CheckRelationResponse;
+import com.aserto.directory.reader.v3.CheckResponse;
+import com.aserto.directory.reader.v3.GetGraphRequest;
+import com.aserto.directory.reader.v3.GetGraphResponse;
+import com.aserto.directory.reader.v3.GetObjectManyResponse;
+import com.aserto.directory.reader.v3.GetObjectResponse;
+import com.aserto.directory.reader.v3.GetObjectsResponse;
+import com.aserto.directory.reader.v3.GetRelationResponse;
+import com.aserto.directory.reader.v3.GetRelationsRequest;
+import com.aserto.directory.reader.v3.GetRelationsResponse;
+import com.aserto.directory.v3.Directory;
+import com.aserto.directory.v3.DirectoryClient;
+import com.aserto.directory.v3.ImportEvent;
+import com.aserto.directory.v3.ImportHandler;
+import com.aserto.directory.v3.UninitilizedClientException;
+import com.aserto.directory.writer.v3.SetObjectResponse;
+import com.aserto.directory.writer.v3.SetRelationResponse;
+import com.aserto.model.ImportElement;
+
+import io.grpc.ManagedChannel;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
+import utils.IntegrationTestsExtension;
 
 @Tag("IntegrationTest")
 @ExtendWith({IntegrationTestsExtension.class})
@@ -34,48 +60,54 @@ class DirectoryClientTest {
     private static DirectoryClient directoryClient;
     private static ManagedChannel channel;
 
-    private final static String originalManifest =
-            "# yaml-language-server: $schema=https://www.topaz.sh/schema/manifest.json\n" +
-            "---\n" +
-            "\n" +
-            "### filename: manifest.yaml ###\n" +
-            "### datetime: 2023-10-17T00:00:00-00:00 ###\n" +
-            "### description: citadel manifest ###\n" +
-            "\n" +
-            "### model ###\n" +
-            "model:\n" +
-            "  version: 3\n" +
-            "\n" +
-            "### object type definitions ###\n" +
-            "types:\n" +
-            "  ### display_name: User ###\n" +
-            "  user:\n" +
-            "    relations:\n" +
-            "      ### display_name: user#manager ###\n" +
-            "      manager: user\n" +
-            "      friend: user\n" +
-            "\n" +
-            "  ### display_name: Identity ###\n" +
-            "  identity:\n" +
-            "    relations:\n" +
-            "      ### display_name: identity#identifier ###\n" +
-            "      identifier: user\n" +
-            "\n" +
-            "  test_type:\n" +
-            "\n" +
-            "  ### display_name: Group ###\n" +
-            "  group:\n" +
-            "    relations:\n" +
-            "      ### display_name: group#member ###\n" +
-            "      member: user\n\n";
-    private final static String modifiedManifest = originalManifest +
-            "  ### display_name: Department ###\n" +
-            "  department:\n" +
-            "    relations:\n" +
-            "      ### display_name: group#member ###\n" +
-            "      member: user\n";
+    private final static String ORIGINAL_MANIFEST =
+            """
+            # yaml-language-server: $schema=https://www.topaz.sh/schema/manifest.json
+            ---
+
+            ### filename: manifest.yaml ###
+            ### datetime: 2023-10-17T00:00:00-00:00 ###
+            ### description: citadel manifest ###
+
+            ### model ###
+            model:
+              version: 3
+
+            ### object type definitions ###
+            types:
+              ### display_name: User ###
+              user:
+                relations:
+                  ### display_name: user#manager ###
+                  manager: user
+                  friend: user
+
+              ### display_name: Identity ###
+              identity:
+                relations:
+                  ### display_name: identity#identifier ###
+                  identifier: user
+
+              test_type:
+
+              ### display_name: Group ###
+              group:
+                relations:
+                  ### display_name: group#member ###
+                  member: user
+
+            """;
+    private final static String MODIFIED_MANIFEST = ORIGINAL_MANIFEST +
+            """
+              ### display_name: Department ###
+              department:
+                relations:
+                  ### display_name: group#member ###
+                  member: user
+            """;
 
     @BeforeAll
+    @SuppressWarnings("unused")
     static void setDirectoryClient() throws SSLException {
        channel = new ChannelBuilder()
                 .withHost("localhost")
@@ -87,18 +119,21 @@ class DirectoryClientTest {
     }
 
     @BeforeEach
+    @SuppressWarnings("unused")
     void beforeEach() throws InterruptedException, UninitilizedClientException {
-        directoryClient.setManifest(originalManifest);
+        directoryClient.setManifest(ORIGINAL_MANIFEST);
         List<ImportElement> list = importCitadelDataList();
         directoryClient.importData(list.stream());
     }
 
     @AfterEach
+    @SuppressWarnings("unused")
     void afterEach() throws UninitilizedClientException {
         directoryClient.deleteManifest();
     }
 
     @AfterAll
+    @SuppressWarnings("unused")
     static void closeChannel() {
         channel.shutdown();
     }
@@ -107,23 +142,24 @@ class DirectoryClientTest {
     @Test
     void testDirectoryClientWithReaderCanRead() {
         // Arrange
-        DirectoryClient directoryClient = new DirectoryClient(channel, null, null, null, null);
+        DirectoryClient client = new DirectoryClient(channel, null, null, null, null);
 
         // Act & Assert
         assertDoesNotThrow(() -> {
-            directoryClient.getObject("user", "rick@the-citadel.com");
+            client.getObject("user", "rick@the-citadel.com");
         });
     }
 
     @Test
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
     void testDirectoryClientWithReaderCannotWrite() {
         // Arrange
-        DirectoryClient directoryClient = new DirectoryClient(channel, null, null, null, null);
+        DirectoryClient client = new DirectoryClient(channel, null, null, null, null);
 
 
         // Act & Assert
         assertThrows(UninitilizedClientException.class, () -> {
-            directoryClient.setObject("test_type", "test_id");
+            client.setObject("test_type", "test_id");
         });
     }
 
@@ -247,6 +283,7 @@ class DirectoryClientTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void testCheckRelationManager() throws UninitilizedClientException {
         // Arrange & Act
         CheckRelationResponse checkRelationResponse = directoryClient.checkRelation(
@@ -261,6 +298,7 @@ class DirectoryClientTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     void testCheckRelationFriend() throws UninitilizedClientException {
         // Arrange & Act
         CheckRelationResponse checkRelationResponse = directoryClient.checkRelation(
@@ -319,7 +357,7 @@ class DirectoryClientTest {
     void setObjectTest() throws UninitilizedClientException {
         // Arrange
         Object object = Directory.buildObject("test_type", "test_id");
-        
+
         // Act
         SetObjectResponse setObjectResponse = directoryClient.setObject("test_type", "test_id");
 
@@ -366,7 +404,7 @@ class DirectoryClientTest {
     @Test
     void deleteRelationTest() throws UninitilizedClientException {
         // Arrange & Act
-        DeleteRelationResponse deleteRelationResponse = directoryClient.deleteRelation(
+        directoryClient.deleteRelation(
                 "user",
                 "morty@the-citadel.com",
                 "manager",
@@ -392,17 +430,17 @@ class DirectoryClientTest {
         GetManifestResponse getManifestResponse = directoryClient.getManifest();
 
         // Assert
-        assertEquals(originalManifest, getManifestResponse.getBody().getData().toStringUtf8());
+        assertEquals(ORIGINAL_MANIFEST, getManifestResponse.getBody().getData().toStringUtf8());
     }
 
     @Test
     void testSetManifest() throws InterruptedException, UninitilizedClientException {
         // Arrange & Act
-        directoryClient.setManifest(modifiedManifest);
+        directoryClient.setManifest(MODIFIED_MANIFEST);
         GetManifestResponse getManifestResponse = directoryClient.getManifest();
 
         // Assert
-        assertEquals(modifiedManifest, getManifestResponse.getBody().getData().toStringUtf8());
+        assertEquals(MODIFIED_MANIFEST, getManifestResponse.getBody().getData().toStringUtf8());
     }
 
     @Test
@@ -418,20 +456,70 @@ class DirectoryClientTest {
     @Test
     void importDataTest() throws InterruptedException, UninitilizedClientException {
         // Arrange
-        List<ImportElement> list = importCitadelDataList();
-        List<Object> users = list.stream()
-                .map(ImportElement::getObject)
-                .filter(object -> object != null && object.getType().equals("user"))
-                .collect(Collectors.toList());
+        class Handler implements ImportHandler {
+            public List<ImportEvent.Error> errors = new ArrayList<>();
+            public int recvObjects = 0;
+            public int recvRelations = 0;
+            public int setObjects = 0;
+            public int setRelations = 0;
+
+            @Override
+            public void onProgress(ImportEvent.Counter counter) {
+                switch(counter.type) {
+                    case OBJECT -> {
+                        recvObjects += counter.recv;
+                        setObjects += counter.set;
+                    }
+                    case RELATION -> {
+                        recvRelations += counter.recv;
+                        setRelations += counter.set;
+                    }
+                    default -> {
+                    }
+                }
+            }
+
+            @Override
+            public void onError(ImportEvent.Error error) {
+                errors.add(error);
+            }
+        }
+
+        List<ImportElement> list = Arrays.asList(
+            new ImportElement(Directory.buildObject("user", "manager@acmecorp.com"), Opcode.OPCODE_SET),
+            new ImportElement(Directory.buildObject("user", "employee@acmecorp.com"), Opcode.OPCODE_SET),
+            new ImportElement(Directory.buildObject("badType", "object_id"), Opcode.OPCODE_SET),
+            new ImportElement(Directory.buildRelation("user", "employee@acmecorp.com", "manager", "user", "manager@acmecorp.com"), Opcode.OPCODE_SET)
+        );
+        Handler handler = new Handler();
 
         // Act
-        directoryClient.importData(list.stream());
+        Status status = directoryClient.importData(list.stream(), handler);
 
         // Assert
-        GetObjectsResponse getObjectsResponse = directoryClient.getObjects("user");
-        assertThat(getObjectsResponse.getResultsList())
-                .usingRecursiveFieldByFieldElementComparatorOnFields("type_", "id_")
-                .containsAll(users);
+        assertThat(status).isEqualTo(Status.OK);
+        assertThat(handler.recvObjects).isEqualTo(3);
+        assertThat(handler.setObjects).isEqualTo(2);
+        assertThat(handler.recvRelations).isEqualTo(1);
+        assertThat(handler.setRelations).isEqualTo(1);
+        assertThat(handler.errors).hasSize(1);
+
+        ImportRequest failedRequest = handler.errors.get(0).request;
+        assertThat(failedRequest.hasObject()).isTrue();
+        assertThat(failedRequest.getObject().getType()).isEqualTo("badType");
+
+        GetRelationResponse relationResponse = directoryClient.getRelation(
+            "user", "employee@acmecorp.com", "manager", "user", "manager@acmecorp.com", true
+        );
+        assertThat(relationResponse.getResult().getObjectType()).isEqualTo("user");
+        assertThat(relationResponse.getResult().getObjectId()).isEqualTo("employee@acmecorp.com");
+        assertThat(relationResponse.getResult().getRelation()).isEqualTo("manager");
+        assertThat(relationResponse.getResult().getSubjectType()).isEqualTo("user");
+        assertThat(relationResponse.getResult().getSubjectId()).isEqualTo("manager@acmecorp.com");
+
+        assertThat(relationResponse.getObjectsCount()).isEqualTo(2);
+        relationResponse.getObjectsOrThrow("user:employee@acmecorp.com");
+        relationResponse.getObjectsOrThrow("user:manager@acmecorp.com");
     }
 
     @Test

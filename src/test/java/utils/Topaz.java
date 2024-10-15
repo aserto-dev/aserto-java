@@ -1,30 +1,13 @@
 package utils;
 
-import com.aserto.ChannelBuilder;
-import com.aserto.directory.v3.DirectoryClient;
-import io.grpc.ManagedChannel;
-
-import javax.net.ssl.SSLException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.time.Duration;
-import java.util.concurrent.*;
 
 public class Topaz {
-    private String HOME_DIR = System.getProperty("user.home");
-    private String DB_DIR = HOME_DIR + "/.local/share/topaz/db";
-    private String TOPAZ_CFG_DIR = HOME_DIR + "/.config/topaz/cfg";
-    private DirectoryClient directoryClient;
-
-    public Topaz() throws SSLException {
-        ManagedChannel channel = new ChannelBuilder()
-                .withHost("localhost")
-                .withPort(9292)
-                .withInsecure(true)
-                .build();
-        directoryClient = new DirectoryClient(channel);
-    }
+    private final String HOME_DIR = System.getProperty("user.home");
+    private final String DB_DIR = HOME_DIR + "/.local/share/topaz/db";
+    private final String TOPAZ_CFG_DIR = HOME_DIR + "/.config/topaz/cfg";
 
     public void run() throws IOException, InterruptedException, URISyntaxException {
         stop();
@@ -48,31 +31,6 @@ public class Topaz {
         pb.inheritIO();
         Process process = pb.start();
         process.waitFor();
-
-        // final Duration timeout = Duration.ofSeconds(60);
-        // ExecutorService executor = Executors.newSingleThreadExecutor();
-
-        // final Future<Integer> handler = executor.submit(new Callable() {
-        //     @Override
-        //     public Integer call() throws Exception {
-        //         while (true) {
-        //             try {
-        //                 directoryClient.getObjects("user");
-        //             } catch (Exception e) {
-        //                 Thread.sleep(2000);
-        //                 continue;
-        //             }
-
-        //             return directoryClient.getObjects("user").getResultsList().size();
-        //         }
-        //     }
-        // });
-
-        // try {
-        //     handler.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
-        // } catch (TimeoutException | InterruptedException | ExecutionException e) {
-        //     handler.cancel(true);
-        // }
     }
 
     private void configure() throws IOException, InterruptedException {
