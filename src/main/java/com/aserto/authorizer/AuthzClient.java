@@ -19,6 +19,7 @@ import com.aserto.authorizer.v2.ListPoliciesResponse;
 import com.aserto.authorizer.v2.QueryRequest;
 import com.aserto.authorizer.v2.QueryResponse;
 import com.aserto.authorizer.v2.api.IdentityContext;
+import com.aserto.authorizer.v2.api.IdentityType;
 import com.aserto.authorizer.v2.api.Module;
 import com.aserto.authorizer.v2.api.PolicyContext;
 import com.aserto.authorizer.v2.api.PolicyInstance;
@@ -32,6 +33,7 @@ import io.grpc.ManagedChannel;
 public class AuthzClient implements AuthorizerClient {
     private final AuthorizerGrpc.AuthorizerBlockingStub client;
     private final ManagedChannel channel;
+
     public AuthzClient(ManagedChannel channel) {
         client = AuthorizerGrpc.newBlockingStub(channel);
         this.channel = channel;
@@ -84,19 +86,27 @@ public class AuthzClient implements AuthorizerClient {
     }
 
     @Override
-    public Struct query(String query, PolicyCtx policyContext, Map<String, Value> values) {
+    public Struct query(String query, IdentityCtx identityCtx, PolicyCtx policyContext,
+            Map<String, Value> resourceCtx) {
         QueryRequest.Builder queryRequestBuilder = QueryRequest.newBuilder();
         queryRequestBuilder.setQuery(query);
 
+        IdentityContext identityContext = buildIdentityContext(identityCtx);
         PolicyInstance policy = buildPolicy(policyContext.getName());
-        Struct.Builder structBuilder = buildResourceContext(values);
+        Struct.Builder resourceContext = buildResourceContext(resourceCtx);
 
+        queryRequestBuilder.setIdentityContext(identityContext);
         queryRequestBuilder.setPolicyInstance(policy);
-        queryRequestBuilder.setResourceContext(structBuilder);
+        queryRequestBuilder.setResourceContext(resourceContext);
 
         QueryResponse queryResponse = client.query(queryRequestBuilder.build());
 
         return queryResponse.getResponse();
+    }
+
+    @Override
+    public Struct query(String query, PolicyCtx policyContext, Map<String, Value> resourceCtx) {
+        return query(query, new IdentityCtx("", IdentityType.IDENTITY_TYPE_NONE), policyContext, resourceCtx);
     }
 
     @Override
@@ -129,7 +139,7 @@ public class AuthzClient implements AuthorizerClient {
     }
 
     private IdentityContext buildIdentityContext(IdentityCtx identityContext) {
-        IdentityContext.Builder identityContextBuilder =  IdentityContext.newBuilder();
+        IdentityContext.Builder identityContextBuilder = IdentityContext.newBuilder();
         identityContextBuilder.setIdentity(identityContext.getIdentity());
         identityContextBuilder.setType(identityContext.getIdentityType());
 

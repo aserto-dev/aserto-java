@@ -18,7 +18,7 @@
         <dependency>
             <groupId>com.aserto</groupId>
             <artifactId>aserto-java</artifactId>
-            <version>0.31.1</version>
+            <version>0.31.4</version>
         </dependency>
     </dependencies>
 

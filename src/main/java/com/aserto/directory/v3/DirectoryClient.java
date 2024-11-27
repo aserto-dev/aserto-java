@@ -19,7 +19,6 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Struct;
 import com.aserto.directory.common.v3.Object;
 
-
 import com.google.protobuf.Timestamp;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
@@ -51,12 +50,11 @@ public class DirectoryClient implements DirectoryClientReader,
     private ModelGrpc.ModelStub modelClientAsync;
 
     public DirectoryClient(
-        ManagedChannel readerChannel,
-        ManagedChannel writerChannel,
-        ManagedChannel importerChannel,
-        ManagedChannel exporterChannel,
-        ManagedChannel modelChannel
-    ) {
+            ManagedChannel readerChannel,
+            ManagedChannel writerChannel,
+            ManagedChannel importerChannel,
+            ManagedChannel exporterChannel,
+            ManagedChannel modelChannel) {
         if (readerChannel != null) {
             readerClient = ReaderGrpc.newBlockingStub(readerChannel);
         }
@@ -92,8 +90,10 @@ public class DirectoryClient implements DirectoryClientReader,
     public GetObjectResponse getObject(String type, String id) throws UninitilizedClientException {
         return getObject(type, id, false);
     }
+
     @Override
-    public GetObjectResponse getObject(String type, String id, boolean withRelations) throws UninitilizedClientException {
+    public GetObjectResponse getObject(String type, String id, boolean withRelations)
+            throws UninitilizedClientException {
         if (readerClient == null) {
             throw new UninitilizedClientException("Reader client is not initialized");
         }
@@ -111,7 +111,8 @@ public class DirectoryClient implements DirectoryClientReader,
     }
 
     @Override
-    public GetObjectsResponse getObjects(String type, int pageSize, String pageToken) throws UninitilizedClientException {
+    public GetObjectsResponse getObjects(String type, int pageSize, String pageToken)
+            throws UninitilizedClientException {
         if (readerClient == null) {
             throw new UninitilizedClientException("Reader client is not initialized");
         }
@@ -123,7 +124,8 @@ public class DirectoryClient implements DirectoryClientReader,
     }
 
     @Override
-    public GetObjectManyResponse getObjectManyRequest(List<ObjectIdentifier> objectIdentifiers) throws UninitilizedClientException {
+    public GetObjectManyResponse getObjectManyRequest(List<ObjectIdentifier> objectIdentifiers)
+            throws UninitilizedClientException {
         if (readerClient == null) {
             throw new UninitilizedClientException("Reader client is not initialized");
         }
@@ -142,49 +144,45 @@ public class DirectoryClient implements DirectoryClientReader,
 
     @Override
     public GetRelationResponse getRelation(
-        String objectType,
-        String objectId,
-        String relationName,
-        String subjectType,
-        String subjectId
-    ) throws UninitilizedClientException {
+            String objectType,
+            String objectId,
+            String relationName,
+            String subjectType,
+            String subjectId) throws UninitilizedClientException {
         return getRelation(objectType, objectId, relationName, subjectType, subjectId, "", false);
     }
 
     @Override
     public GetRelationResponse getRelation(
-        String objectType,
-        String objectId,
-        String relationName,
-        String subjectType,
-        String subjectId,
-        boolean withObjects
-    ) throws UninitilizedClientException {
+            String objectType,
+            String objectId,
+            String relationName,
+            String subjectType,
+            String subjectId,
+            boolean withObjects) throws UninitilizedClientException {
         return getRelation(objectType, objectId, relationName, subjectType, subjectId, "", withObjects);
     }
 
     @Override
     public GetRelationResponse getRelation(
-        String objectType,
-        String objectId,
-        String relationName,
-        String subjectType,
-        String subjectId,
-        String subjectRelation
-    ) throws UninitilizedClientException {
+            String objectType,
+            String objectId,
+            String relationName,
+            String subjectType,
+            String subjectId,
+            String subjectRelation) throws UninitilizedClientException {
         return getRelation(objectType, objectId, relationName, subjectType, subjectId, subjectRelation, false);
     }
 
     @Override
     public GetRelationResponse getRelation(
-        String objectType,
-        String objectId,
-        String relationName,
-        String subjectType,
-        String subjectId,
-        String subjectRelation,
-        boolean withObjects
-    ) throws UninitilizedClientException {
+            String objectType,
+            String objectId,
+            String relationName,
+            String subjectType,
+            String subjectId,
+            String subjectRelation,
+            boolean withObjects) throws UninitilizedClientException {
         if (readerClient == null) {
             throw new UninitilizedClientException("Reader client is not initialized");
         }
@@ -212,35 +210,36 @@ public class DirectoryClient implements DirectoryClientReader,
     /**
      * Checks whether a subject has a given permission on an object.
      *
-     * @deprecated use @link {@link #check(String, String, String, String, String)} instead.
+     * @deprecated use @link {@link #check(String, String, String, String, String)}
+     *             instead.
      */
     @Deprecated
     @Override
     public CheckPermissionResponse checkPermission(
-        String objectType,
-        String objectId,
-        String subjectType,
-        String subjectId,
-        String permissionName
-    ) throws UninitilizedClientException {
+            String objectType,
+            String objectId,
+            String subjectType,
+            String subjectId,
+            String permissionName) throws UninitilizedClientException {
         return checkPermission(objectType, objectId, subjectType, subjectId, permissionName, false);
     }
 
     /**
      * Checks whether a subject has a given permission on an object.
      *
-     * @deprecated use @link {@link #check(String, String, String, String, String, boolean)} instead.
+     * @deprecated use @link
+     *             {@link #check(String, String, String, String, String, boolean)}
+     *             instead.
      */
     @Deprecated
     @Override
     public CheckPermissionResponse checkPermission(
-        String objectType,
-        String objectId,
-        String subjectType,
-        String subjectId,
-        String permissionName,
-        boolean trace
-    ) throws UninitilizedClientException {
+            String objectType,
+            String objectId,
+            String subjectType,
+            String subjectId,
+            String permissionName,
+            boolean trace) throws UninitilizedClientException {
         if (readerClient == null) {
             throw new UninitilizedClientException("Reader client is not initialized");
         }
@@ -258,35 +257,36 @@ public class DirectoryClient implements DirectoryClientReader,
     /**
      * Checks whether a subject has a given relation to an object.
      *
-     * @deprecated use @link {@link #check(String, String, String, String, String)} instead.
+     * @deprecated use @link {@link #check(String, String, String, String, String)}
+     *             instead.
      */
     @Deprecated
     @Override
     public CheckRelationResponse checkRelation(
-        String objectType,
-        String objectId,
-        String relationName,
-        String subjectType,
-        String subjectId
-    ) throws UninitilizedClientException {
+            String objectType,
+            String objectId,
+            String relationName,
+            String subjectType,
+            String subjectId) throws UninitilizedClientException {
         return checkRelation(objectType, objectId, relationName, subjectType, subjectId, false);
     }
 
     /**
      * Checks whether a subject has a given relation to an object.
      *
-     * @deprecated use @link {@link #check(String, String, String, String, String, boolean)} instead.
+     * @deprecated use @link
+     *             {@link #check(String, String, String, String, String, boolean)}
+     *             instead.
      */
     @Deprecated
     @Override
     public CheckRelationResponse checkRelation(
-        String objectType,
-        String objectId,
-        String relationName,
-        String subjectType,
-        String subjectId,
-        boolean trace
-    ) throws UninitilizedClientException {
+            String objectType,
+            String objectId,
+            String relationName,
+            String subjectType,
+            String subjectId,
+            boolean trace) throws UninitilizedClientException {
         if (readerClient == null) {
             throw new UninitilizedClientException("Reader client is not initialized");
         }
@@ -303,24 +303,22 @@ public class DirectoryClient implements DirectoryClientReader,
 
     @Override
     public CheckResponse check(
-        String objectType,
-        String objectId,
-        String relationName,
-        String subjectType,
-        String subjectId
-    ) throws UninitilizedClientException {
+            String objectType,
+            String objectId,
+            String relationName,
+            String subjectType,
+            String subjectId) throws UninitilizedClientException {
         return check(objectType, objectId, relationName, subjectType, subjectId, false);
     }
 
     @Override
     public CheckResponse check(
-        String objectType,
-        String objectId,
-        String relationName,
-        String subjectType,
-        String subjectId,
-        boolean trace
-    ) throws UninitilizedClientException {
+            String objectType,
+            String objectId,
+            String relationName,
+            String subjectType,
+            String subjectId,
+            boolean trace) throws UninitilizedClientException {
         if (readerClient == null) {
             throw new UninitilizedClientException("Reader client is not initialized");
         }
@@ -347,12 +345,11 @@ public class DirectoryClient implements DirectoryClientReader,
 
     @Override
     public SetObjectResponse setObject(
-        String type,
-        String id,
-        String displayName,
-        Struct properties,
-        String hash
-    ) throws UninitilizedClientException {
+            String type,
+            String id,
+            String displayName,
+            Struct properties,
+            String hash) throws UninitilizedClientException {
         if (writerClient == null) {
             throw new UninitilizedClientException("Writer client is not initialized");
         }
@@ -368,8 +365,8 @@ public class DirectoryClient implements DirectoryClientReader,
                         .setDisplayName(displayName)
                         .setProperties(properties)
                         .setCreatedAt(timestamp)
-                        .build()
-        ).build();
+                        .build())
+                .build();
 
         return writerClient.setObject(objRequest);
     }
@@ -380,7 +377,8 @@ public class DirectoryClient implements DirectoryClientReader,
     }
 
     @Override
-    public DeleteObjectResponse deleteObject(String type, String id, boolean withRelations) throws UninitilizedClientException {
+    public DeleteObjectResponse deleteObject(String type, String id, boolean withRelations)
+            throws UninitilizedClientException {
         if (writerClient == null) {
             throw new UninitilizedClientException("Writer client is not initialized");
         }
@@ -394,12 +392,11 @@ public class DirectoryClient implements DirectoryClientReader,
 
     @Override
     public SetRelationResponse setRelation(
-        String objectType,
-        String objectId,
-        String relationName,
-        String subjectType,
-        String subjectId
-    ) throws UninitilizedClientException {
+            String objectType,
+            String objectId,
+            String relationName,
+            String subjectType,
+            String subjectId) throws UninitilizedClientException {
         if (writerClient == null) {
             throw new UninitilizedClientException("Writer client is not initialized");
         }
@@ -417,13 +414,12 @@ public class DirectoryClient implements DirectoryClientReader,
 
     @Override
     public SetRelationResponse setRelation(
-        String objectType,
-        String objectId,
-        String relationName,
-        String subjectType,
-        String subjectId,
-        String subjectRelation
-    ) throws UninitilizedClientException {
+            String objectType,
+            String objectId,
+            String relationName,
+            String subjectType,
+            String subjectId,
+            String subjectRelation) throws UninitilizedClientException {
         if (writerClient == null) {
             throw new UninitilizedClientException("Writer client is not initialized");
         }
@@ -442,14 +438,13 @@ public class DirectoryClient implements DirectoryClientReader,
 
     @Override
     public SetRelationResponse setRelation(
-        String objectType,
-        String objectId,
-        String relationName,
-        String subjectType,
-        String subjectId,
-        String subjectRelation,
-        String hash
-    ) throws UninitilizedClientException {
+            String objectType,
+            String objectId,
+            String relationName,
+            String subjectType,
+            String subjectId,
+            String subjectRelation,
+            String hash) throws UninitilizedClientException {
         if (writerClient == null) {
             throw new UninitilizedClientException("Writer client is not initialized");
         }
@@ -469,12 +464,11 @@ public class DirectoryClient implements DirectoryClientReader,
 
     @Override
     public DeleteRelationResponse deleteRelation(
-        String objectType,
-        String objectId,
-        String relationName,
-        String subjectType,
-        String subjectId
-    ) throws UninitilizedClientException {
+            String objectType,
+            String objectId,
+            String relationName,
+            String subjectType,
+            String subjectId) throws UninitilizedClientException {
         if (writerClient == null) {
             throw new UninitilizedClientException("Writer client is not initialized");
         }
@@ -490,13 +484,12 @@ public class DirectoryClient implements DirectoryClientReader,
 
     @Override
     public DeleteRelationResponse deleteRelation(
-        String objectType,
-        String objectId,
-        String relationName,
-        String subjectType,
-        String subjectId,
-        String subjectRelation
-    ) throws UninitilizedClientException {
+            String objectType,
+            String objectId,
+            String relationName,
+            String subjectType,
+            String subjectId,
+            String subjectRelation) throws UninitilizedClientException {
         if (writerClient == null) {
             throw new UninitilizedClientException("Writer client is not initialized");
         }
@@ -518,12 +511,11 @@ public class DirectoryClient implements DirectoryClientReader,
         }
 
         GetManifestRequest manifestRequest = GetManifestRequest.newBuilder().build();
-        Iterator<GetManifestResponse> manifestResponses =  modelClient.getManifest(manifestRequest);
+        Iterator<GetManifestResponse> manifestResponses = modelClient.getManifest(manifestRequest);
 
-        Metadata.Builder metadataBuilder =  Metadata.newBuilder();
+        Metadata.Builder metadataBuilder = Metadata.newBuilder();
 
-
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         manifestResponses.forEachRemaining(manifestResponse -> {
             if (!manifestResponse.getMetadata().getAllFields().isEmpty()) {
                 manifestResponse.getMetadata().getAllFields().forEach(metadataBuilder::setField);
@@ -531,7 +523,8 @@ public class DirectoryClient implements DirectoryClientReader,
                 try {
                     outputStream.write(manifestResponse.getBody().getData().toByteArray());
                 } catch (IOException e) {
-                    logger.error("Could not write to stream the fallowing message: {}", manifestResponse.getBody().getData().toByteArray());
+                    logger.error("Could not write to stream the fallowing message: {}",
+                            manifestResponse.getBody().getData().toByteArray());
                 }
             }
         });
@@ -587,7 +580,6 @@ public class DirectoryClient implements DirectoryClientReader,
         }
     }
 
-
     @Override
     public DeleteManifestResponse deleteManifest() throws UninitilizedClientException {
         if (modelClient == null) {
@@ -597,13 +589,16 @@ public class DirectoryClient implements DirectoryClientReader,
         return modelClient.deleteManifest(DeleteManifestRequest.newBuilder().build());
     }
 
+    @Deprecated
     @Override
-    public void importData(Stream<ImportElement> importStream) throws InterruptedException, UninitilizedClientException {
+    public void importData(Stream<ImportElement> importStream)
+            throws InterruptedException, UninitilizedClientException {
         importData(importStream, new NullImportHandler());
     }
 
     @Override
-    public Status importData(Stream<ImportElement> importStream, ImportHandler handler) throws InterruptedException, UninitilizedClientException {
+    public Status importData(Stream<ImportElement> importStream, ImportHandler handler)
+            throws InterruptedException, UninitilizedClientException {
         if (importerClient == null) {
             throw new UninitilizedClientException("Import client is not initialized");
         }
@@ -612,14 +607,15 @@ public class DirectoryClient implements DirectoryClientReader,
         StreamObserver<ImportRequest> requests = importerClient.import_(responses);
 
         importStream.takeWhile(
-            t -> responses.getStatus().isOk()
-        ).forEach(importElement -> {
-            if (importElement.getObject() != null) {
-                requests.onNext(ImportRequest.newBuilder().setOpCode(importElement.getOpcode()).setObject(importElement.getObject()).build());
-            } else if (importElement.getRelation() != null) {
-                requests.onNext(ImportRequest.newBuilder().setOpCode(importElement.getOpcode()).setRelation(importElement.getRelation()).build());
-            }
-        });
+                t -> responses.getStatus().isOk()).forEach(importElement -> {
+                    if (importElement.getObject() != null) {
+                        requests.onNext(ImportRequest.newBuilder().setOpCode(importElement.getOpcode())
+                                .setObject(importElement.getObject()).build());
+                    } else if (importElement.getRelation() != null) {
+                        requests.onNext(ImportRequest.newBuilder().setOpCode(importElement.getOpcode())
+                                .setRelation(importElement.getRelation()).build());
+                    }
+                });
         requests.onCompleted();
 
         return responses.await(5, TimeUnit.SECONDS);
