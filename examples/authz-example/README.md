@@ -34,7 +34,7 @@ topaz configure -d -s -r ghcr.io/aserto-policies/policy-todo:v2 todo
 
 ```bash
 topaz stop 
-wget https://raw.githubusercontent.com/aserto-dev/topaz/main/pkg/testing/assets/eds-citadel.db -O ~/.config/topaz/db/directory.db
+wget https://www.topaz.sh/assets/templates/v32/citadel/db/citadel.db -O ~/.config/topaz/db/directory.db
 ```
 
 * Start topaz
